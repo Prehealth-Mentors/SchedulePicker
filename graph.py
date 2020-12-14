@@ -19,9 +19,9 @@ class Graph:
         #  days that there could possbily be meetings for.
         self.time_format = "%H:%M"
 
-       self.cutoff_score = 80
+        self.cutoff_score = 80
 
-       self.group_size = group_size
+        self.group_size = group_size
 
         # To do this, lets first create a dictionary with all of the days of the week
         self.graph = {
@@ -93,23 +93,25 @@ class Graph:
         with open(filename, newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
+
                 # The first element of the table should be the email address of the person
                 email = row[0]
 
                 # The second row should be if they are a mentor or not
-                isMentor = row[1]
+                isMentor = row[1] == '1'
 
                 # The final rows should be the times that the person is availiable
                 for z in row[2:]:
                     # First get the day
                     sp = z.split(":")
+
                     if len(sp) > 1:
                         day = sp[0]
 
                         # Now get the times
 
                         times = ":".join(sp[1:]).split("-")
-
+                        print(times)
 
                         # Bad news is that this is a range, so we have to check to see which durations we can fit in
                         for g in range(0,len(self.graph[self.key_hash(day)])):
@@ -120,7 +122,7 @@ class Graph:
                                 ti["PeopleAvailiable"].append(Node(email,isMentor,True))
                                 if email not in peopleHash.keys():
                                     peopleHash[email] = []
-                                peopleHash[email].append({"key":day,"time",g})
+                                peopleHash[email].append({"key":day.strip(),"time":g})
         return peopleHash
 
 
@@ -129,15 +131,17 @@ class Graph:
         # Find the largest cluster of people in the graph first. We can then makes groups out of
         #  these people
         max_people = 0
-        str_time = ""
-        key = ""
+        str_time = None
+        key = None
 
         for g in self.graph.keys():
           possible_times = self.graph[g]
           better_nodes = []
+
           for e in possible_times:
               nodes = [n for n in e["PeopleAvailiable"] if n.isOpen == True]
-              mentors = [n for n in e["PeopleAvailiable"] if n.isMentor == True]
+              mentors = [n for n in nodes if n.isMentor == True]
+
               if len(nodes) > max_people and {"key":key,"time":str_time} not in pasttries and len(mentors) > 0:
                   max_people = len(nodes)
                   str_time = e["meeting_time"]
@@ -146,7 +150,13 @@ class Graph:
         return max_people,str_time,key
 
     def update(self,peoplelist=[],value_change=False):
-        print("Hi")
+        for people in peoplelist:
+            vals = self.peopleHash[people.email]
+            for v in vals:
+                time_slot = self.graph[v["key"]][v["time"]]["PeopleAvailiable"]
+                for t in time_slot:
+                    if t.email == people.email:
+                        t.isOpen = value_change
     def make_group(self,ti,key):
         times = self.graph[key]
         obj = None
@@ -166,8 +176,8 @@ class Graph:
 
         best_group = None
         best_score = -1
-        for m in mentor:
-            for me in mentees
+        for m in mentors:
+          for me in mentees:
             group = {"key":key,"time":ti,"mentor":m,"mentees":me}
 
             # Add to the group list for now
@@ -188,39 +198,78 @@ class Graph:
         self.update(peoplelist=[best_group["mentor"]] + best_group["mentees"])
 
         # Finally return the score
-        return best_score
+        return best_score,best_group
 
-    def run(self)
-      # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
-      #  in the graph and remove them.
-      # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
-      # acceptable score.
+    def write_graph(self):
+        for g in self.graph.keys():
+            l = self.graph[g]
+            for i in l:
+                if len(i["PeopleAvailiable"]) > 0:
+                    p = [pp.email for pp in i["PeopleAvailiable"] ]
+                    print(g,i["meeting_time"]," ".join(p))
+    def run(self):
+        # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
+        #  in the graph and remove them.
+        # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
+        # acceptable score.
 
-      # Create an array to hold the groups that we created
-      self.groups = []
+        # Create an array to hold the groups that we created
+        self.groups = []
 
-      # To do this, lets set up an array that will hold the scores over each run
-      scores = [0]
-      # Next define a kill switch that will activate if the scores don't seem to be improving
-      killSwitch = False
+        # To do this, lets set up an array that will hold the scores over each run
+        scores = [0]
+        # Next define a kill switch that will activate if the scores don't seem to be improving
+        killSwitch = False
 
-      # Define an array that holds the past tries for this
-      past_trys = []
+        # Define an array that holds the past tries for this
+        past_trys = []
 
-      score_ndx = 0
+        score_ndx = 0
 
-      while not killSwitch and score[len(score) - 1] < self.cutoff_score:
-          # First, lets check to see that our previous score is an improvement
-          if len(scores) > 1 and scores[score_ndx - 1] < scores[score_ndx - 2]:
+        while not killSwitch and scores[len(scores) - 1] < self.cutoff_score:
+            # First, lets check to see that our previous score is an improvement
+            '''
+            if len(scores) > 1 and scores[score_ndx - 1] < scores[score_ndx - 2]:
               # If its not an improvement, lets pop off the last group and check again
               last_group = self.groups[len(self.groups) -1]
               self.groups = self.groups[0:len(self.groups) -1]
               max_people, str_time, key = self.find_largest_cluster(pasttries=past_trys)
-              self.makegroup(str_time,key)
+              score,group = self.makegroup(str_time,key)
+              self.groups.append(group)
+              scores.append(score)
+            else:
+            '''
+            past_trys = []
+            max_people, str_time, key = self.find_largest_cluster()
+            if key == None:
+                killSwitch = True
+            else:
+                score,group = self.make_group(str_time,key)
+                self.groups.append(group)
+                scores.append(score)
+            # Check to see if
+        self.write_results(self.groups,scores)
+
+    def write_results(self,groups,scores):
+        f = open("outfile.txt","w")
+        f.write("Meetign Day, Meeting Time, Mentor,Mentees\n")
+        for g in groups:
+            mentee_list = " ".join([z.email for z in g["mentees"]])
+            f.write("%s,%s,%s,%s\n" % (g["key"],g["time"],g["mentor"].email,mentee_list))
+        f.close()
 
 
 
-          # Lets find the largest cluster in the group
+    def find_unmatched_mentees(self):
+        left_over_people = []
+        for key in self.peopleHash.keys():
+            if key in left_over_people:
+                continue
+            one_time = self.peopleHash[key][0]
+            people = self.graph[one_time["key"]][one_time["time"]]["PeopleAvailiable"]
+            left_over = [p.email for p in people if p.isOpen == True]
+            left_over_people = left_over_people + left_over
+        return left_over_people
 
 
 
@@ -246,14 +295,11 @@ class Graph:
         score = score + len([z for z in self.groups if z["mentor"] is not None]) * 10
 
         # Get points based on the size of the groups
-        score = score + sum([10 - (z["mentee"] % self.group_size) for z in self.groups])
+        score = score + sum([10 - min(len(z["mentees"]) % self.group_size,10-len(z["mentees"])) for z in self.groups])
 
         # Lose points for mentees that are left over
-        for key in self.peopleHash.keys():
-            one_time = self.peopleHash[key][0]
-            isOpen = self.graph[one_time["key"]]one_time["time"]
-            if isOpen:
-                score = score - 1
+        score = score - len(self.find_unmatched_mentees())
+
 
         return score
 

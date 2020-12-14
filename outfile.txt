@@ -1,0 +1,2 @@
+Meetign Day, Meeting Time, Mentor,Mentees
+T,08:00,Samuel_Shenoi1@baylor.edu,Alice_Homie@baylor.edu John_Smith@baylor.edu
