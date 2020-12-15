@@ -1,4 +1,7 @@
 Name, isMentor, Times
-Samuel_Shenoi1@baylor.edu,1, M:1:00PM-2:00PM, T:11:00AM-4:00PM, W:10:00AM-5:00PM,R:8:30AM-5:00PM
-Alice_Homie@baylor.edu,0, M:1:00PM-2:00PM, T:11:00AM-4:00PM, W:10:00AM-5:00PM,R:8:30AM-5:00PM
-John_Smith@baylor.edu,0, F:1:00PM-5:00PM
+plbif@baylor.edu,0,W:05:19AM-11:21AM,
+valre@baylor.edu,0,W:09:05AM-07:59PM,T:08:02AM-08:40AM,
+cxjaz@baylor.edu,0,S:06:41AM-03:51PM,N:05:23PM-08:33PM,F:01:53AM-01:57PM,M:04:51AM-04:55AM,
+apmgm@baylor.edu,0,F:08:19AM-10:45AM,S:10:09AM-01:47PM,T:01:58PM-07:59PM,
+lxjlp@baylor.edu,0,W:02:53PM-05:56PM,F:01:11PM-05:32PM,
+nonak@baylor.edu,1,W:07:14AM-11:56PM,N:04:51PM-08:53PM,T:09:33AM-10:43AM,M:02:07PM-03:13PM,

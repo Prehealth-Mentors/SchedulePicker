@@ -29,7 +29,9 @@ class Graph:
             "T" :[],
             "W":[],
             "R":[],
-            "F":[]
+            "F":[],
+            "S":[],
+            "N":[]
         }
         if weekend_meetings:
             self.graph["S"] = []
@@ -174,6 +176,7 @@ class Graph:
 
             # Add to the group list for now
             self.groups.append(group)
+            self.update(peoplelist=[m] + me,value_change=False)
 
             # Calculate score
             score = self.calculate_score()
@@ -185,6 +188,7 @@ class Graph:
 
             # Now remove from group list so that we dont contaminate
             self.groups = self.groups[0:len(self.groups) -1]
+            self.update(peoplelist=[m] + me,value_change=True)
 
         # Now we take the best group and we update all of the instances of the people to not be open
         self.update(peoplelist=[best_group["mentor"]] + best_group["mentees"])
