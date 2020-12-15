@@ -36,23 +36,15 @@ class Graph:
             self.graph["N"] = []
 
         # Now for each day of the week, we need to create enough spots for all of the possible times
-        timedelt = datetime.strptime(latest_time, self.time_format) - datetime.strptime(earliest_time, self.time_format)
-        seconds = timedelt.total_seconds()
-        meeting_duration_seconds = meeting_duration * 60
-        total_meeting_times = int(seconds/meeting_duration_seconds)
-
-
-
         duration_hours = int(meeting_duration/60)
         duration_minutes = meeting_duration - (duration_hours * 60)
-        meeting_duration_string = "%d:%dAM" % (duration_hours,duration_minutes)
 
 
         meeting_time = datetime.strptime(earliest_time, self.time_format)
-        for m in range(0,total_meeting_times):
+        while meeting_time + timedelta(hours=duration_hours,minutes=duration_minutes) < datetime.strptime(latest_time, self.time_format):
             for g in self.graph.keys():
                 self.graph[g].append({"meeting_time":meeting_time.strftime(self.time_format),"PeopleAvailiable":[], "beginning":meeting_time,"ending":meeting_time + timedelta(hours=duration_hours,minutes=duration_minutes)})
-            meeting_time = meeting_time + timedelta(hours=duration_hours,minutes=duration_minutes)
+            meeting_time = meeting_time + timedelta(minutes=15)
 
         # After we have constructed the graph object, lets read in all of the data to the graph
         self.peopleHash = self.readfile(filename)
