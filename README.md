@@ -5,8 +5,8 @@ This repository creates a schedule for peer leading based on mentor/mentee avail
  - Sam Shenoi
 
 ## Input data
-The program uses a specific comma seperated value (csv) file format in order to handle multiple people being inserted at once. Please refer to the sampledata/in.txt file for an example of how the data must be formatted. There are no
-checks currently to ensure that your data is in the correct format so the program will epically fail if
+The program uses a specific comma seperated value (csv) file format in order to handle multiple people being inserted at once. Please refer to the **sampledata/sample.txt** file for an example of how the data must be formatted.
+There are no checks currently to ensure that your data is in the correct format so the program will epically fail if
 the data is not provided in a correct format.
 
 Some highlights to the file format are listed below
@@ -32,3 +32,22 @@ Some highlights to the file format are listed below
     - `python3 main.py -h`
 
 
+## Additional Cool Stuff
+In order to test the program with sample data, there is a python program included that will generate random data.
+It is called `datagen.py`. In order to run it, simply run `python3 datagen.py`
+
+## FAQs
+There might be some issues with the commands listed in this document. This program and commands were written based on
+the MacOS operating system. Some common issues are listed below.
+
+- git is not a recognized command
+  - if you are on windows install git bash. Google it, it's pretty easy to install
+  - if you are on macos install xcode. If you dont want to wait 8 hours for xcode to download
+      google how to install the xcode-command line tools.
+
+- python3 is not a recognized command
+  - Make sure that python is installed. Try replacing python3 with python and see if that works.
+  - Installing python on windows is a pain sometimes. If it doesn't work go find somebody with a mac and xcode installed
+
+- program crashes
+  - your data is in the incorrect format or the program writers messed up. Check your data first and if it still doesn't work then send an email to whoever is in charge of this to get it fixed.
