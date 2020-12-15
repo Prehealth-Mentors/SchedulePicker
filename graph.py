@@ -14,10 +14,10 @@ class Node:
         self.isOpen = isOpen
 
 class Graph:
-    def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00",latest_time="17:00",group_size=10):
+    def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM",group_size=10):
         # We need to construct a graphical matrix representation for the possible times and
         #  days that there could possbily be meetings for.
-        self.time_format = "%H:%M"
+        self.time_format = "%I:%M%p"
 
         self.cutoff_score = 80
 
@@ -45,7 +45,7 @@ class Graph:
 
         duration_hours = int(meeting_duration/60)
         duration_minutes = meeting_duration - (duration_hours * 60)
-        meeting_duration_string = "%d:%d" % (duration_hours,duration_minutes)
+        meeting_duration_string = "%d:%dAM" % (duration_hours,duration_minutes)
 
 
         meeting_time = datetime.strptime(earliest_time, self.time_format)
@@ -111,14 +111,13 @@ class Graph:
                         # Now get the times
 
                         times = ":".join(sp[1:]).split("-")
-                        print(times)
+                        beginning = datetime.strptime(times[0], self.time_format)
+                        ending = datetime.strptime(times[1], self.time_format)
 
                         # Bad news is that this is a range, so we have to check to see which durations we can fit in
                         for g in range(0,len(self.graph[self.key_hash(day)])):
-                            beginning = datetime.strptime(times[0], self.time_format)
-                            ending = datetime.strptime(times[1], self.time_format)
                             ti = self.graph[self.key_hash(day)][g]
-                            if beginning >= ti["beginning"] and ending <= ti["ending"]:
+                            if ti["beginning"] >= beginning and ti["ending"] <= ending:
                                 ti["PeopleAvailiable"].append(Node(email,isMentor,True))
                                 if email not in peopleHash.keys():
                                     peopleHash[email] = []
@@ -157,6 +156,7 @@ class Graph:
                 for t in time_slot:
                     if t.email == people.email:
                         t.isOpen = value_change
+
     def make_group(self,ti,key):
         times = self.graph[key]
         obj = None
@@ -201,6 +201,7 @@ class Graph:
         return best_score,best_group
 
     def write_graph(self):
+        print("----------------")
         for g in self.graph.keys():
             l = self.graph[g]
             for i in l:

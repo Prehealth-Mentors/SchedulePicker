@@ -9,8 +9,8 @@ from graph import Graph
 # Functions
 def main(input_file):
     g = Graph(input_file)
-    g.write_graph()
-    #g.run()
+    #g.write_graph()
+    g.run()
 
 
 if __name__ =="__main__":
