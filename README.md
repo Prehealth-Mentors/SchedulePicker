@@ -4,6 +4,18 @@ This repository creates a schedule for peer leading based on mentor/mentee avail
 ## Authors
  - Sam Shenoi
 
+## Input data
+The program uses a specific comma seperated value (csv) file format in order to handle multiple people being inserted at once. Please refer to the sampledata/in.txt file for an example of how the data must be formatted. There are no
+checks currently to ensure that your data is in the correct format so the program will epically fail if
+the data is not provided in a correct format.
+
+Some highlights to the file format are listed below
+- First row needs to be email and **only** email. The program does not accept names
+- Second row is a binary (0 or 1) value specifying if the person is a mentor or mentee. 1 means mentor 0 means mentee
+- The remaining rows are the days of the week and times that the person is availiable. These entries must be comma seperated and be in the following format.
+   - <day of the week>:<start time>-<end time>, ...
+   - Ex: M:2:00PM-4:00PM,T:10:0AM-5:00PM
+
 ## How to run
 - To run this program first clone the repository.
      - Go to https://github.com/Prehealth-Mentors/SchedulePicker
@@ -18,3 +30,5 @@ This repository creates a schedule for peer leading based on mentor/mentee avail
     - `python3 main.py --input_file <path to file>`
     - For a full list of the options that this program provides run
     - `python3 main.py -h`
+
+
