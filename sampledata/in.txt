@@ -1,0 +1,4 @@
+Name, isMentor, Times
+Samuel_Shenoi1@baylor.edu,1, M:1:00PM-2:00PM, T:11:00AM-4:00PM, W:10:00AM-5:00PM,R:8:30AM-5:00PM
+Alice_Homie@baylor.edu,0, M:1:00PM-2:00PM, T:11:00AM-4:00PM, W:10:00AM-5:00PM,R:8:30AM-5:00PM
+John_Smith@baylor.edu,0, F:1:00PM-5:00PM

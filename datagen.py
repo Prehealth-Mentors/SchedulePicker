@@ -14,6 +14,7 @@ class DataGen:
         f = open("sampledata/in.txt","w")
         for i in range(0,num_mentees):
             email = ''.join(random.choice(self.letters) for i in range(5)) + "@baylor.edu"
+            isMentor = 0
             
 
 
