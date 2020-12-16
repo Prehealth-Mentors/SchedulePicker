@@ -6,6 +6,7 @@
 import random
 import string
 from datetime import datetime, date,timedelta
+import csv
 
 class DataGen:
     def __init__(self):
@@ -24,9 +25,68 @@ class DataGen:
         }
         return days[i]
 
-    def format_real_data(self):
+    def format_real_data(self,mentor_file,mentee_file):
         # Use this function to take data from the google form and format it into something we can use
-        print("HI")
+        first_row = True
+        csv_dict = dict()
+        people = []
+        with open(mentor_file, newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                if first_row:
+                    counter = 0
+                    for r in row:
+                        csv_dict[r] = counter
+                        counter = counter + 1
+                    first_row = False
+                else:
+                    email = row[csv_dict['Email']]
+                    if email != " " and email != "":
+                        r = row[csv_dict["Please indicate whether you are a transfer student or not"] + 2:]
+                        time_str = ",".join(r)
+                        time_str = time_str.replace(" ", "")
+                        people.append({"email":email,"time_str":time_str,"isMentor":1})
+        first_row = True
+        csv_dict = dict()
+        with open(mentee_file, newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                if first_row:
+                    counter = 0
+                    for r in row:
+                        csv_dict[r] = counter
+                        counter = counter + 1
+                    first_row = False
+
+                else:
+                    if len(row) > 0:
+                        name = row[csv_dict['name']]
+                        try:
+                            email = row[csv_dict['Email']]
+                        except:
+                            email = name
+
+                        try:
+                            r = row[16:len(row) -4]
+
+                        except:
+                            r = ""
+                        if r != "":
+
+                            time_str = ",".join(r)
+                            time_str = time_str.replace(" ", "")
+                            people.append({"email":email,"time_str":time_str,"isMentor":0})
+
+        f = open("realdata/in.txt","w")
+        f.write("Name, isMentor, Times\n")
+        for p in people:
+            f.write("%s,%s,%s\n" % (p["email"],p["isMentor"],p["time_str"]))
+        f.close()
+
+
+
+
+
 
     def create_times(self,num_days):
         added = []
@@ -55,6 +115,8 @@ class DataGen:
             if no_conflict:
                 added.append(new_obj)
         return added
+
+
 
 
     def create_fake_data(self,num_mentees=50,num_mentors=10):
@@ -89,7 +151,8 @@ class DataGen:
 if __name__== "__main__":
 
     dg = DataGen()
-    dg.create_fake_data(num_mentees=500,num_mentors=60)
+    dg.format_real_data("realdata/mentors.csv","realdata/mentees.csv")
+    #dg.create_fake_data(num_mentees=500,num_mentors=60)
 
 
 

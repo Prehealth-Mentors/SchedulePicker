@@ -166,7 +166,7 @@ class Graph:
         for people in peoplelist:
             vals = self.peopleHash[people.email]
             for v in vals:
-                time_slot = self.graph[v["key"]][v["time"]]["PeopleAvailiable"]
+                time_slot = self.graph[self.key_hash(v["key"])][v["time"]]["PeopleAvailiable"]
                 for t in time_slot:
                     if t.email == people.email:
                         t.isOpen = value_change
@@ -255,6 +255,8 @@ class Graph:
 
         iteration = 1
 
+        total_people = len(self.peopleHash.keys())
+
         print("Running optomization... This might take a while")
         while not killSwitch:
             past_trys = []
@@ -271,7 +273,8 @@ class Graph:
 
             # After 20 iteration lets the user know that we are still going
             if iteration % 5 == 0:
-                print("Completed iteration %d" % iteration)
+                percent = ((iteration * self.group_size)/total_people) * 100
+                print("About %f\% complete" % percent)
             iteration = iteration + 1
 
         self.match_unmatched()
@@ -306,13 +309,13 @@ class Graph:
 
 
     def write_results(self,groups,scores):
-        f = open("groups.txt","w")
+        f = open("groups.csv","w")
         f.write("Meeting Day, Meeting Time, Mentor,Mentees\n")
         for g in groups:
             mentee_list = " ".join([z.email for z in g["mentees"]])
             f.write("%s,%s,%s,%s\n" % (g["key"],g["time"],g["mentor"].email,mentee_list))
         f.close()
-        f = open("unmatched.txt","w")
+        f = open("unmatched.csv","w")
         unmatched = self.find_unmatched_mentees()
         f.write("Email\n")
         for u in unmatched:
@@ -328,7 +331,7 @@ class Graph:
             if key in left_over_people:
                 continue
             one_time = self.peopleHash[key][0]
-            people = self.graph[one_time["key"]][one_time["time"]]["PeopleAvailiable"]
+            people = self.graph[self.key_hash(one_time["key"])][one_time["time"]]["PeopleAvailiable"]
             left_over = [p.email for p in people if p.isOpen == True]
             left_over_people = left_over_people + left_over
         return list(set(left_over_people))

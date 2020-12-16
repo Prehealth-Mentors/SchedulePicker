@@ -31,6 +31,10 @@ Some highlights to the file format are listed below
     - For a full list of the options that this program provides run
     - `python3 main.py -h`
 
+## Output
+The program outputs to two files: **groups.csv** and **unmatched.csv**. The groups.txt file contains the Meeting Day, Meeting Time, Mentor,Mentees for each group. This file is csv file which can then be opened in excel. Unmatched.csv
+contains people who the program was unable to find a group for based on their availibility. The program tries to
+keep the group sizes as even as possible by 
 
 ## Additional Cool Stuff
 In order to test the program with sample data, there is a python program included that will generate random data.
