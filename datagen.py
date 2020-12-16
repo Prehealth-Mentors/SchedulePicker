@@ -63,10 +63,17 @@ class DataGen:
         f.write("Name, isMentor, Times\n")
 
         for i in range(0,num_mentees + num_mentors):
-            email = ''.join(random.choice(self.letters) for i in range(5)) + "@baylor.edu"
+
             isMentor = 0
+            email = ""
+
             if i > num_mentees - 1:
                 isMentor = 1
+                mentor_number = i % num_mentees
+                email = "mentor%d@baylor.edu" % mentor_number
+            else:
+                email = "mentee%d@baylor.edu" % i
+
 
             num_days = random.randint(1,7)
             times = self.create_times(num_days)
@@ -82,7 +89,7 @@ class DataGen:
 if __name__== "__main__":
 
     dg = DataGen()
-    dg.create_fake_data(num_mentees=5,num_mentors=1)
+    dg.create_fake_data(num_mentees=500,num_mentors=60)
 
 
 

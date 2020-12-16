@@ -1,0 +1,50 @@
+Meetign Day, Meeting Time, Mentor,Mentees
+M,12:15PM,mentor2@baylor.edu,mentee148@baylor.edu mentee497@baylor.edu mentee284@baylor.edu mentee437@baylor.edu mentee392@baylor.edu mentee9@baylor.edu mentee282@baylor.edu
+N,03:00PM,mentor0@baylor.edu,mentee125@baylor.edu mentee98@baylor.edu mentee151@baylor.edu mentee192@baylor.edu mentee371@baylor.edu mentee230@baylor.edu mentee21@baylor.edu
+M,11:15AM,mentor6@baylor.edu,mentee160@baylor.edu mentee241@baylor.edu mentee16@baylor.edu mentee172@baylor.edu mentee369@baylor.edu mentee457@baylor.edu mentee331@baylor.edu
+N,02:15PM,mentor12@baylor.edu,mentee343@baylor.edu mentee34@baylor.edu mentee5@baylor.edu mentee167@baylor.edu mentee375@baylor.edu mentee221@baylor.edu mentee300@baylor.edu
+M,02:15PM,mentor23@baylor.edu,mentee377@baylor.edu mentee435@baylor.edu mentee85@baylor.edu mentee128@baylor.edu mentee326@baylor.edu mentee316@baylor.edu mentee219@baylor.edu mentee95@baylor.edu mentee67@baylor.edu mentee199@baylor.edu
+T,12:30PM,mentor7@baylor.edu,mentee246@baylor.edu mentee358@baylor.edu mentee7@baylor.edu mentee347@baylor.edu mentee29@baylor.edu mentee105@baylor.edu mentee424@baylor.edu mentee174@baylor.edu mentee206@baylor.edu mentee103@baylor.edu mentee278@baylor.edu
+T,02:30PM,mentor8@baylor.edu,mentee289@baylor.edu mentee351@baylor.edu mentee177@baylor.edu mentee464@baylor.edu mentee152@baylor.edu mentee364@baylor.edu mentee47@baylor.edu mentee60@baylor.edu
+F,12:30PM,mentor15@baylor.edu,mentee477@baylor.edu mentee197@baylor.edu mentee113@baylor.edu mentee356@baylor.edu mentee54@baylor.edu mentee450@baylor.edu mentee430@baylor.edu mentee77@baylor.edu mentee281@baylor.edu mentee100@baylor.edu
+N,02:15PM,mentor22@baylor.edu,mentee183@baylor.edu mentee283@baylor.edu mentee27@baylor.edu mentee404@baylor.edu mentee26@baylor.edu mentee297@baylor.edu mentee484@baylor.edu
+M,02:15PM,mentor30@baylor.edu,mentee468@baylor.edu mentee42@baylor.edu mentee312@baylor.edu mentee461@baylor.edu mentee360@baylor.edu mentee20@baylor.edu mentee381@baylor.edu
+T,12:30PM,mentor17@baylor.edu,mentee426@baylor.edu mentee226@baylor.edu mentee92@baylor.edu mentee0@baylor.edu mentee76@baylor.edu mentee248@baylor.edu mentee475@baylor.edu
+F,12:30PM,mentor18@baylor.edu,mentee359@baylor.edu mentee399@baylor.edu mentee129@baylor.edu mentee264@baylor.edu mentee306@baylor.edu mentee444@baylor.edu mentee176@baylor.edu
+S,02:15PM,mentor1@baylor.edu,mentee332@baylor.edu mentee271@baylor.edu mentee443@baylor.edu mentee330@baylor.edu mentee361@baylor.edu mentee439@baylor.edu mentee175@baylor.edu mentee108@baylor.edu
+M,09:15AM,mentor27@baylor.edu,mentee193@baylor.edu mentee162@baylor.edu mentee24@baylor.edu mentee418@baylor.edu mentee150@baylor.edu mentee51@baylor.edu mentee205@baylor.edu mentee107@baylor.edu mentee338@baylor.edu mentee434@baylor.edu mentee322@baylor.edu mentee139@baylor.edu mentee492@baylor.edu mentee147@baylor.edu
+F,01:30PM,mentor24@baylor.edu,mentee280@baylor.edu mentee469@baylor.edu mentee320@baylor.edu mentee318@baylor.edu mentee33@baylor.edu mentee393@baylor.edu mentee346@baylor.edu
+N,03:00PM,mentor25@baylor.edu,mentee256@baylor.edu mentee409@baylor.edu mentee94@baylor.edu mentee348@baylor.edu mentee121@baylor.edu mentee482@baylor.edu mentee433@baylor.edu
+W,01:15PM,mentor11@baylor.edu,mentee254@baylor.edu mentee448@baylor.edu mentee104@baylor.edu mentee37@baylor.edu mentee287@baylor.edu mentee334@baylor.edu mentee250@baylor.edu
+R,02:30PM,mentor5@baylor.edu,mentee311@baylor.edu mentee84@baylor.edu mentee485@baylor.edu mentee19@baylor.edu mentee182@baylor.edu mentee44@baylor.edu mentee52@baylor.edu
+M,02:15PM,mentor37@baylor.edu,mentee48@baylor.edu mentee78@baylor.edu mentee170@baylor.edu mentee36@baylor.edu mentee255@baylor.edu mentee79@baylor.edu mentee11@baylor.edu
+S,02:15PM,mentor9@baylor.edu,mentee97@baylor.edu mentee432@baylor.edu mentee2@baylor.edu mentee410@baylor.edu mentee244@baylor.edu mentee222@baylor.edu mentee188@baylor.edu
+T,03:15PM,mentor35@baylor.edu,mentee238@baylor.edu mentee298@baylor.edu mentee232@baylor.edu mentee141@baylor.edu mentee106@baylor.edu mentee268@baylor.edu mentee242@baylor.edu mentee124@baylor.edu
+F,01:30PM,mentor28@baylor.edu,mentee25@baylor.edu mentee498@baylor.edu mentee499@baylor.edu mentee324@baylor.edu mentee317@baylor.edu mentee265@baylor.edu mentee204@baylor.edu
+N,02:15PM,mentor39@baylor.edu,mentee220@baylor.edu mentee261@baylor.edu mentee400@baylor.edu mentee372@baylor.edu mentee120@baylor.edu mentee224@baylor.edu mentee213@baylor.edu
+M,03:15PM,mentor19@baylor.edu,mentee483@baylor.edu mentee96@baylor.edu mentee50@baylor.edu mentee122@baylor.edu mentee395@baylor.edu mentee370@baylor.edu mentee391@baylor.edu mentee336@baylor.edu
+R,03:30PM,mentor10@baylor.edu,mentee132@baylor.edu mentee266@baylor.edu mentee325@baylor.edu mentee101@baylor.edu mentee290@baylor.edu mentee18@baylor.edu mentee335@baylor.edu mentee354@baylor.edu mentee279@baylor.edu
+M,09:15AM,mentor40@baylor.edu,mentee164@baylor.edu mentee454@baylor.edu mentee210@baylor.edu mentee140@baylor.edu mentee401@baylor.edu mentee480@baylor.edu mentee305@baylor.edu
+W,01:30PM,mentor31@baylor.edu,mentee321@baylor.edu mentee118@baylor.edu mentee309@baylor.edu mentee378@baylor.edu mentee72@baylor.edu mentee57@baylor.edu mentee8@baylor.edu
+T,12:30PM,mentor21@baylor.edu,mentee61@baylor.edu mentee496@baylor.edu mentee119@baylor.edu mentee49@baylor.edu mentee329@baylor.edu mentee90@baylor.edu mentee115@baylor.edu
+R,10:30AM,mentor16@baylor.edu,mentee198@baylor.edu mentee449@baylor.edu mentee211@baylor.edu mentee223@baylor.edu mentee267@baylor.edu mentee446@baylor.edu mentee161@baylor.edu mentee275@baylor.edu mentee436@baylor.edu mentee200@baylor.edu mentee366@baylor.edu mentee56@baylor.edu mentee405@baylor.edu mentee247@baylor.edu mentee269@baylor.edu mentee458@baylor.edu
+F,09:45AM,mentor32@baylor.edu,mentee415@baylor.edu mentee239@baylor.edu mentee6@baylor.edu mentee471@baylor.edu mentee257@baylor.edu mentee413@baylor.edu mentee253@baylor.edu mentee207@baylor.edu mentee237@baylor.edu mentee388@baylor.edu mentee488@baylor.edu mentee73@baylor.edu
+M,02:15PM,mentor44@baylor.edu,mentee146@baylor.edu mentee251@baylor.edu mentee131@baylor.edu mentee15@baylor.edu mentee472@baylor.edu mentee70@baylor.edu mentee227@baylor.edu
+N,02:00PM,mentor56@baylor.edu,mentee376@baylor.edu mentee258@baylor.edu mentee62@baylor.edu mentee64@baylor.edu mentee274@baylor.edu mentee344@baylor.edu mentee235@baylor.edu
+T,03:30PM,mentor38@baylor.edu,mentee340@baylor.edu mentee214@baylor.edu mentee440@baylor.edu mentee81@baylor.edu mentee406@baylor.edu mentee272@baylor.edu mentee411@baylor.edu mentee35@baylor.edu
+S,11:15AM,mentor42@baylor.edu,mentee308@baylor.edu mentee453@baylor.edu mentee89@baylor.edu mentee273@baylor.edu mentee156@baylor.edu mentee385@baylor.edu mentee419@baylor.edu mentee421@baylor.edu mentee403@baylor.edu
+R,02:15PM,mentor52@baylor.edu,mentee1@baylor.edu mentee109@baylor.edu mentee285@baylor.edu mentee389@baylor.edu mentee260@baylor.edu mentee422@baylor.edu mentee445@baylor.edu mentee169@baylor.edu
+M,09:30AM,mentor50@baylor.edu,mentee408@baylor.edu mentee333@baylor.edu mentee43@baylor.edu mentee337@baylor.edu mentee262@baylor.edu mentee126@baylor.edu mentee173@baylor.edu mentee292@baylor.edu
+T,09:15AM,mentor49@baylor.edu,mentee463@baylor.edu mentee293@baylor.edu mentee14@baylor.edu mentee429@baylor.edu mentee68@baylor.edu mentee466@baylor.edu mentee342@baylor.edu mentee93@baylor.edu mentee191@baylor.edu mentee59@baylor.edu
+F,12:30PM,mentor34@baylor.edu,mentee46@baylor.edu mentee270@baylor.edu mentee185@baylor.edu mentee259@baylor.edu mentee386@baylor.edu mentee374@baylor.edu mentee123@baylor.edu
+W,08:00AM,mentor26@baylor.edu,mentee134@baylor.edu mentee350@baylor.edu mentee441@baylor.edu mentee296@baylor.edu mentee111@baylor.edu mentee349@baylor.edu mentee4@baylor.edu mentee396@baylor.edu mentee486@baylor.edu mentee154@baylor.edu
+R,12:45PM,mentor54@baylor.edu,mentee303@baylor.edu mentee314@baylor.edu mentee423@baylor.edu mentee416@baylor.edu mentee383@baylor.edu mentee117@baylor.edu mentee153@baylor.edu mentee194@baylor.edu
+S,08:30AM,mentor55@baylor.edu,mentee478@baylor.edu mentee420@baylor.edu mentee184@baylor.edu mentee234@baylor.edu mentee291@baylor.edu mentee431@baylor.edu mentee474@baylor.edu mentee249@baylor.edu mentee491@baylor.edu mentee398@baylor.edu mentee127@baylor.edu
+N,12:00PM,mentor58@baylor.edu,mentee17@baylor.edu mentee357@baylor.edu mentee143@baylor.edu mentee302@baylor.edu mentee363@baylor.edu mentee195@baylor.edu mentee252@baylor.edu mentee459@baylor.edu mentee165@baylor.edu mentee481@baylor.edu mentee110@baylor.edu mentee138@baylor.edu
+S,02:45PM,mentor4@baylor.edu,mentee218@baylor.edu mentee447@baylor.edu mentee425@baylor.edu mentee190@baylor.edu mentee168@baylor.edu mentee180@baylor.edu mentee397@baylor.edu mentee163@baylor.edu
+F,09:45AM,mentor46@baylor.edu,mentee473@baylor.edu mentee315@baylor.edu mentee355@baylor.edu mentee353@baylor.edu mentee352@baylor.edu mentee171@baylor.edu mentee179@baylor.edu
+W,01:45PM,mentor45@baylor.edu,mentee417@baylor.edu mentee116@baylor.edu mentee135@baylor.edu mentee178@baylor.edu mentee407@baylor.edu mentee387@baylor.edu mentee216@baylor.edu
+W,01:30PM,mentor51@baylor.edu,mentee133@baylor.edu mentee476@baylor.edu mentee299@baylor.edu
+T,09:15AM,mentor59@baylor.edu,mentee13@baylor.edu mentee236@baylor.edu mentee225@baylor.edu mentee394@baylor.edu mentee479@baylor.edu mentee38@baylor.edu mentee494@baylor.edu
+S,01:45PM,mentor47@baylor.edu,mentee442@baylor.edu mentee142@baylor.edu mentee286@baylor.edu
+W,03:30PM,mentor43@baylor.edu,mentee102@baylor.edu mentee12@baylor.edu mentee145@baylor.edu
