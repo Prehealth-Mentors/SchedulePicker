@@ -276,19 +276,20 @@ class Graph:
                 percent = ((iteration * self.group_size)/total_people) * 100
                 print("About %f\% complete" % percent)
             iteration = iteration + 1
-
-        self.match_unmatched()
-        self.write_results(self.groups,scores)
-    def match_unmatched(self):
-        # We still have some leftover people. Lets see if we can find them a home
         unmatched = self.find_unmatched_mentees()
+        if len(unmatched) > 0:
+            self.match_unmatched(unmatched)
+        self.write_results(self.groups,scores)
+    def match_unmatched(self,unmatched):
+        # We still have some leftover people. Lets see if we can find them a home
+
 
         matched = []
 
         for um in unmatched:
             # Get all of the times that this person is free
             times = self.peopleHash[um]
-            p_nodes = self.graph[times[0]["key"]][times[0]["time"]]["PeopleAvailiable"]
+            p_nodes = self.graph[self.key_hash(times[0]["key"])][times[0]["time"]]["PeopleAvailiable"]
             p_node = [p for p in p_nodes if p.email == um][0]
             killSwitch = False
 
