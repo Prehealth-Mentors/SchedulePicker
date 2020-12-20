@@ -15,12 +15,12 @@ class DataGen:
 
     def switcher(self,i):
         days = {
-            1:"M",
+            1:"Monday",
             2:"T",
             3:"W",
             4:"R",
-            5:"F",
-            6:"S",
+            5:"Friday",
+            6:"Saturday",
             7:"N"
         }
         return days[i]
@@ -151,8 +151,8 @@ class DataGen:
 if __name__== "__main__":
 
     dg = DataGen()
-    dg.format_real_data("realdata/mentors.csv","realdata/mentees.csv")
-    #dg.create_fake_data(num_mentees=500,num_mentors=60)
+    #dg.format_real_data("realdata/mentors.csv","realdata/mentees.csv")
+    dg.create_fake_data()
 
 
 

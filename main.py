@@ -8,7 +8,7 @@ from graph import Graph
 
 # Functions
 def main(input_file):
-    g = Graph(input_file,group_size=5)
+    g = Graph(input_file)
     #g.write_graph()
     g.run()
 
