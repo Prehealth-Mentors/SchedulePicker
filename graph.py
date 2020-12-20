@@ -16,6 +16,9 @@ class Node:
         self.email =email
         self.isMentor = isMentor
         self.isOpen = isOpen
+    def toString(self):
+        print(self.email,self.isMentor,self.isOpen)
+
 
 class Graph:
     def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM"):
@@ -23,7 +26,7 @@ class Graph:
         #  days that there could possbily be meetings for.
         self.time_format = "%I:%M%p"
 
-        self.cutoff_score = 80
+        self.sample_size = 25
 
 
 
@@ -54,6 +57,9 @@ class Graph:
 
         # After we have constructed the graph object, lets read in all of the data to the graph
         self.peopleHash = self.readfile(filename)
+
+
+
 
 
     def key_hash(self,key):
@@ -123,7 +129,8 @@ class Graph:
                             for g in range(0,len(self.graph[self.key_hash(day)])):
                                 ti = self.graph[self.key_hash(day)][g]
                                 if ti["beginning"] >= beginning and ti["ending"] <= ending:
-                                    ti["PeopleAvailiable"].append(copy.copy(node))
+                                    ti["PeopleAvailiable"].append(node)
+                                    assert(node == ti["PeopleAvailiable"][len(ti["PeopleAvailiable"])-1])
 
         # Calculate the target group size based on the mentor mentee ratio
         self.group_size = int((len(peopleHash.keys()) - num_mentors)/num_mentors)
@@ -170,8 +177,8 @@ class Graph:
 
     def update(self,peoplelist=[],value_change=False):
         for people in peoplelist:
-            val = self.peopleHash[people.email]
-            val.isOpen = value_change
+            people.isOpen = value_change
+
 
 
     def make_group(self,ti,key):
@@ -199,14 +206,6 @@ class Graph:
         mentees_list = mentees_list + [mentees[0:int(self.group_size*.5)]]
 
 
-        '''
-        mentees_list = [mentees[i:i + self.group_size] for i in range(0, len(mentees), self.group_size)]
-        larger_size = int(self.group_size * 1.5)
-        mentees_list = mentees_list + [mentees[i:i + larger_size ] for i in range(0, len(mentees), larger_size )]
-        '''
-
-
-
         best_group = None
         best_score = float('-inf')
 
@@ -232,15 +231,23 @@ class Graph:
         # Finally return the score
         return best_score,best_group
 
-    def write_graph(self):
+    def test(self,people=[]):
+        k = self.peopleHash.keys()
+        a = [p for p in k if self.peopleHash[p].isOpen == False]
+        assert(len(people) ==len(a))
 
+
+
+
+
+    def write_graph(self):
         for g in self.graph.keys():
             l = self.graph[g]
             for i in l:
                 if len(i["PeopleAvailiable"]) > 0:
                     p = [pp.email for pp in i["PeopleAvailiable"] if pp.isOpen==True]
                     print(g,i["meeting_time"]," ".join(p))
-    def run(self):
+    def run(self,generation_cap=150):
         # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
         #  in the graph and remove them.
         # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
@@ -261,7 +268,7 @@ class Graph:
         print("Running optomization... This might take a while")
         self.tree = dict()
         groupnumber = 0
-        while not killSwitch:
+        while not killSwitch and generation < generation_cap:
             # We are trying a generation based approach
             # To do this, we first need to find parents from the previous generation
             ids = [e for e in self.tree.keys() if self.tree[e]["generation"]+1 ==generation]
@@ -269,36 +276,48 @@ class Graph:
 
             # In order to prevent exponential running time, we need to cap the number of ids that we explore
             #  Lets randomly sample some ideas.
-            ids = random.sample(ids,min(len(ids),100))
+            ids = random.sample(ids,min(len(ids),self.sample_size))
 
 
             # If we have no ids that means that we are in the first generation.
             if len(ids) == 0:
                 max_people, clusters = self.find_target_size_clusters()
-                clusters = random.sample(clusters,20)
+                clusters = random.sample(clusters,self.sample_size)
 
-                groupnumber = self.process_cluster(clusters,groupnumber,generation)
+                groupnumber = self.process_cluster(clusters,groupnumber,generation,parent=-1)
+
+
+               #killSwitch = True
 
             else:
-                killSwitch = True
+
                 # Otherwise, we have to loop through all of the groups from the previous generation
                 # and create the next generation based on that.
                 for id in ids:
                     grp = self.tree[id]
 
                     # Lets first update the graph, so that we are up to date with previous versions
-               
-                    self.update(peoplelist=grp["total_people"],value_change=False)
+                    z = list(set(grp["total_people"]))
+
+
+
+                    self.update(peoplelist=grp["total_people"])
+
+                    #self.test(people=grp["total_people"])
+                    self.groups, _ = self.get_group(id)
 
                     # Now lets find the clusters that we are looking for
                     max_people, clusters = self.find_target_size_clusters()
+
 
 
                     # if we can't find anything with the target size, lets just try to make a few more groups
                     if len(clusters) == 0:
                         max_people,clusters = self.find_largest_cluster()
 
-                    print(len(clusters))
+                    clusters = random.sample(clusters,min(len(clusters),20))
+
+
 
                     # If we still can't find anything, this id is donzo
                     if len(clusters) != 0:
@@ -306,36 +325,56 @@ class Graph:
                         # Create new nodes for each cluster
                         groupnumber = self.process_cluster(clusters,groupnumber,generation,parent=id,prevpeople=grp["total_people"])
 
+
+
                     # Un-update so we don't contaminate results
                     self.update(peoplelist=grp["total_people"],value_change=True)
 
+
             # In order to prevent exponental increase, we need to prune the tree after each generation
-            self.prune(generation)
+            self.prune(generation=generation)
+            '''
+            if generation == 4:
+                for key in self.tree.keys():
+                    print(key,self.tree[key]["generation"],len(self.tree[key]["total_people"]))
+                killSwitch = True
+            '''
             print("Completed generation %s" % generation)
 
             generation = generation +1
 
         # Find the highest scoring family and write the results
-        groups,scores = self.get_highest()
+        id,groups,scores = self.get_highest()
+
+        # Get the group so we can update everything
+        final_group = self.tree[id]
+        self.update(peoplelist=final_group["total_people"])
+
+
 
         self.write_results(groups,scores)
 
     def get_highest(self):
-        best_score = self.tree[0]["score"]
+        best_score = float('-inf')
         best_group_id = 0
         for key in self.tree.keys():
             if self.tree[key]["score"] > best_score:
                 best_group_id = key
                 best_score =self.tree[key]["score"]
+        # Also since this is the end, lets update the graph
+        groups,scores = self.get_group(best_group_id)
+        return best_group_id,groups,scores
+
+
+    def get_group(self,id):
         groups = []
         scores = []
-        best_group = self.tree[best_group_id]
-        while best_group["generation"] > -1:
+        best_group = self.tree[id]
+        while best_group["parent"] > -1:
             groups.append(best_group["group"])
             scores.append(best_group["score"])
             best_group = self.tree[best_group["parent"]]
         return groups,scores
-
 
     def prune(self,generation):
 
@@ -345,19 +384,14 @@ class Graph:
             # Ideally, we want to limit the amount of work in the next generation. To do this, we need to treat
             # this generation and the previous generations differently
             if counter == generation:
-                median_score = statistics.median([self.tree[e]["score"] for e in self.tree.keys() if self.tree[e]["generation"] == generation])
+                scores = [self.tree[e]["score"] for e in self.tree.keys() if self.tree[e]["generation"] == generation]
+                if len(scores) > 0:
+                    median_score = statistics.median(scores)
 
-
-                # Lets remove everything from this generation that falls below the median
-                ids = [e for e in self.tree.keys() if self.tree[e]["generation"] == generation and self.tree[e]["score"] < median_score]
-                for i in ids:
-                    del self.tree[i]
-            else:
-                # The main reason we would want to prune an earlier branch is if the likelihood that groups stemming from this generation
-                #  to be a good solution are really unlikely. The following reasons might lead to this conclusion
-                #   ???
-                i = 2
-
+                    # Lets remove everything from this generation that falls below the median
+                    ids = [e for e in self.tree.keys() if self.tree[e]["generation"] == generation and self.tree[e]["score"] < median_score]
+                    for i in ids:
+                        del self.tree[i]
             counter = counter -1
 
 
@@ -369,6 +403,7 @@ class Graph:
             score,group = self.make_group(cluster["str_time"],cluster["key"])
             self.tree[groupnumber] = {"parent":parent,"group": group,"score":score,"generation":generation,"total_people":group["mentees"] + [group["mentor"]] + prevpeople}
             groupnumber = groupnumber + 1
+
         return groupnumber
     '''
     def match_unmatched(self,unmatched):
@@ -422,7 +457,7 @@ class Graph:
         left_over_people = []
         for key in self.peopleHash.keys():
             isOpen = self.peopleHash[key].isOpen
-            if isOpen:
+            if isOpen == True:
                 left_over_people.append(key)
 
         return list(set(left_over_people))

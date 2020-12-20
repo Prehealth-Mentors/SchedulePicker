@@ -9,6 +9,7 @@ from graph import Graph
 # Functions
 def main(input_file):
     g = Graph(input_file)
+    #g.test()
     #g.write_graph()
     g.run()
 
