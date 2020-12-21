@@ -130,3 +130,7 @@ dmypy.json
 
 # Don't add any real data to git
 realdata/*
+
+groups.csv
+
+unmatched.csv

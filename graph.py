@@ -247,7 +247,7 @@ class Graph:
                 if len(i["PeopleAvailiable"]) > 0:
                     p = [pp.email for pp in i["PeopleAvailiable"] if pp.isOpen==True]
                     print(g,i["meeting_time"]," ".join(p))
-    def run(self,generation_cap=150):
+    def run(self,generation_cap=500):
         # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
         #  in the graph and remove them.
         # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
@@ -339,7 +339,8 @@ class Graph:
                     print(key,self.tree[key]["generation"],len(self.tree[key]["total_people"]))
                 killSwitch = True
             '''
-            print("Completed generation %s" % generation)
+            if generation % 10 == 0:
+                print("Completed generation %s" % generation)
 
             generation = generation +1
 
@@ -349,6 +350,7 @@ class Graph:
         # Get the group so we can update everything
         final_group = self.tree[id]
         self.update(peoplelist=final_group["total_people"])
+        print("Best Group found in generation:%s" % final_group["generation"])
 
 
 
@@ -488,12 +490,18 @@ class Graph:
         # Get points based on the size of the groups
         for z in self.groups:
             group_size = len(z["mentees"])
-            penalty = min(group_size % self.group_size,self.group_size - group_size)
+            larger_group = group_size % self.group_size
+            smaller_group = abs(self.group_size - group_size)
+
+            penalty = pow(min(larger_group,smaller_group),1.25)
             score = score - penalty
+
+            # Get a bonus if the group is exactly the size that we want
+            score = score + 100
 
 
         # Lose points for mentees that are left over
-        score = score - len(self.find_unmatched_mentees())* 10
+        score = score - pow(len(self.find_unmatched_mentees()),2)
 
 
         return score
