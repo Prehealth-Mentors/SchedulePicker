@@ -13,9 +13,10 @@ import statistics
 
 class Node:
     def __init__(self,email,isMentor,isOpen):
-        self.email =email
+        self.email = email
         self.isMentor = isMentor
         self.isOpen = isOpen
+        self.feature_dict = dict()
     def toString(self):
         print(self.email,self.isMentor,self.isOpen)
 
@@ -26,7 +27,7 @@ class Graph:
         #  days that there could possbily be meetings for.
         self.time_format = "%I:%M%p"
 
-        self.sample_size = 25
+        self.sample_size = 50
 
 
 
@@ -97,18 +98,38 @@ class Graph:
         is_first = True
         with open(filename, newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            feature_dict = dict()
             for row in spamreader:
                 if is_first:
                     is_first = False
+                    counter = 0
+                    for r in row:
+                        feature_dict[r.lower().strip()] = counter
+                        counter  = counter + 1
+
+                    # Check to make sure that times is the last field in the header row. Since
+                    #  there can be more than one time, this must be the case
+                    print(feature_dict.keys())
+                    assert(feature_dict["times"] == counter - 1)
+
                 else:
                     # The first element of the table should be the email address of the person
-                    email = row[0]
+                    email = row[feature_dict["email"]]
 
                     # The second row should be if they are a mentor or not
-                    num_mentors = num_mentors + int(row[1])
-                    isMentor = row[1] == '1'
+                    num_mentors = num_mentors + int(row[feature_dict["ismentor"]])
+                    isMentor = row[feature_dict["ismentor"]] == '1'
+
+                    # Finally check to see if there are any additional features that we need to be aware of
+
+
 
                     node = Node(email,isMentor,True)
+
+                    key_list =  [key for key in feature_dict.keys() if key != "email" and key != "times" and key != "ismentor"]
+
+                    for key in key_list:
+                        node.feature_dict[key] = row[feature_dict[key]]  == '1'
                     peopleHash[email] = node
 
                     # The final rows should be the times that the person is availiable
@@ -133,7 +154,7 @@ class Graph:
                                     assert(node == ti["PeopleAvailiable"][len(ti["PeopleAvailiable"])-1])
 
         # Calculate the target group size based on the mentor mentee ratio
-        self.group_size = int((len(peopleHash.keys()) - num_mentors)/num_mentors)
+        self.group_size = int((len(peopleHash.keys()) - num_mentors)/num_mentors) + 1
         print("Group Size:%s" % self.group_size)
 
         return peopleHash
@@ -247,7 +268,7 @@ class Graph:
                 if len(i["PeopleAvailiable"]) > 0:
                     p = [pp.email for pp in i["PeopleAvailiable"] if pp.isOpen==True]
                     print(g,i["meeting_time"]," ".join(p))
-    def run(self,generation_cap=500):
+    def run(self,generation_cap=100):
         # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
         #  in the graph and remove them.
         # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
@@ -282,7 +303,7 @@ class Graph:
             # If we have no ids that means that we are in the first generation.
             if len(ids) == 0:
                 max_people, clusters = self.find_target_size_clusters()
-                clusters = random.sample(clusters,self.sample_size)
+                clusters = random.sample(clusters,min(len(clusters),self.sample_size))
 
                 groupnumber = self.process_cluster(clusters,groupnumber,generation,parent=-1)
 
@@ -497,11 +518,24 @@ class Graph:
             score = score - penalty
 
             # Get a bonus if the group is exactly the size that we want
-            score = score + 100
+            score = score + 20
+
+            # Lets check the additional features to see if we were able to account for those
+            #  since they are additional, lets add points instead of substracting them
+            if len(z["mentees"]) > 0:
+                feature_keys = z["mentees"][0].feature_dict
+                for key in feature_keys:
+                    feature_score = sum([m.feature_dict[key] for m in z["mentees"]])
+                    feature_score = feature_score + z["mentor"].feature_dict[key]
+                    score + feature_score
+
+
 
 
         # Lose points for mentees that are left over
         score = score - pow(len(self.find_unmatched_mentees()),2)
+
+
 
 
         return score

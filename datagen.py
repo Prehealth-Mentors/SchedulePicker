@@ -7,6 +7,7 @@ import random
 import string
 from datetime import datetime, date,timedelta
 import csv
+import time
 
 class DataGen:
     def __init__(self):
@@ -122,7 +123,8 @@ class DataGen:
     def create_fake_data(self,num_mentees=50,num_mentors=10):
 
         f = open("sampledata/in.txt","w")
-        f.write("Name, isMentor, Times\n")
+        f.write("Email, isMentor, OnlineOnly,Transfer, Times\n")
+        random.seed(time.time())
 
         for i in range(0,num_mentees + num_mentors):
 
@@ -140,7 +142,15 @@ class DataGen:
             num_days = random.randint(1,7)
             times = self.create_times(num_days)
 
-            f.write("%s,%s," % (email,isMentor))
+            only_online = random.randint(1,20) < 3
+            only_online = 1 if only_online else 0
+
+            transfer = random.randint(1,20) < 2
+            transfer = 1 if transfer else 0
+
+
+
+            f.write("%s,%s,%s,%s," % (email,isMentor,only_online,transfer))
 
             for a in times:
                 f.write("%s:%s-%s," % (a["day"],datetime.strftime(a["start"],"%I:%M%p"),datetime.strftime(a["end"],"%I:%M%p")))
