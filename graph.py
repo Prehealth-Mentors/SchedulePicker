@@ -22,14 +22,12 @@ class Node:
 
 
 class Graph:
-    def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM"):
+    def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM",sample_size=25):
         # We need to construct a graphical matrix representation for the possible times and
         #  days that there could possbily be meetings for.
         self.time_format = "%I:%M%p"
 
-        self.sample_size = 50
-
-
+        self.sample_size = sample_size
 
         # To do this, lets first create a dictionary with all of the days of the week
         self.graph = {
@@ -109,7 +107,7 @@ class Graph:
 
                     # Check to make sure that times is the last field in the header row. Since
                     #  there can be more than one time, this must be the case
-                    print(feature_dict.keys())
+
                     assert(feature_dict["times"] == counter - 1)
 
                 else:
@@ -155,6 +153,7 @@ class Graph:
 
         # Calculate the target group size based on the mentor mentee ratio
         self.group_size = int((len(peopleHash.keys()) - num_mentors)/num_mentors) + 1
+        self.num_mentors =num_mentors
         print("Group Size:%s" % self.group_size)
 
         return peopleHash
@@ -173,7 +172,7 @@ class Graph:
               mentors = [n for n in nodes if n.isMentor == True]
 
               if len(mentors) > 0:
-                  clusters.append({"str_time":e["meeting_time"],"key":g})
+                clusters.append({"str_time":e["meeting_time"],"key":g})
         return self.group_size,clusters
 
 
@@ -198,7 +197,8 @@ class Graph:
 
     def update(self,peoplelist=[],value_change=False):
         for people in peoplelist:
-            people.isOpen = value_change
+            if people != "None":
+                people.isOpen = value_change
 
 
 
@@ -222,6 +222,7 @@ class Graph:
 
         # Shuffle up the mentees so that we get a better version
         random.shuffle(mentees)
+        random.shuffle(mentors)
         mentees_list = [mentees[0:self.group_size]]
         mentees_list = mentees_list + [mentees[0:min(len(mentees),int(self.group_size*1.5))]]
         mentees_list = mentees_list + [mentees[0:int(self.group_size*.5)]]
@@ -231,11 +232,17 @@ class Graph:
         best_score = float('-inf')
 
         for me in mentees_list:
-            group = {"key":key,"time":ti,"mentor":mentors[0],"mentees":me}
+            mentor = Node("None",True,False)
+            peoplelist = me
+            if len(mentors) > 0:
+                mentor = mentors[0]
+                peoplelist = peoplelist + [mentor]
+
+            group = {"key":key,"time":ti,"mentor":mentor,"mentees":me}
 
             # Add to the group list for now
             self.groups.append(group)
-            self.update(peoplelist=[mentors[0]] + me,value_change=False)
+            self.update(peoplelist=peoplelist,value_change=False)
 
             # Calculate score
             score = self.calculate_score()
@@ -247,7 +254,7 @@ class Graph:
 
             # Now remove from group list so that we dont contaminate
             self.groups = self.groups[0:len(self.groups) -1]
-            self.update(peoplelist=[mentors[0]] + me,value_change=True)
+            self.update(peoplelist=peoplelist,value_change=True)
 
         # Finally return the score
         return best_score,best_group
@@ -268,7 +275,8 @@ class Graph:
                 if len(i["PeopleAvailiable"]) > 0:
                     p = [pp.email for pp in i["PeopleAvailiable"] if pp.isOpen==True]
                     print(g,i["meeting_time"]," ".join(p))
-    def run(self,generation_cap=100):
+
+    def run(self,generation_cap=500):
         # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
         #  in the graph and remove them.
         # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
@@ -277,8 +285,7 @@ class Graph:
         # Create an array to hold the groups that we created
         self.groups = []
 
-        # To do this, lets set up an array that will hold the scores over each run
-        scores = []
+
         # Next define a kill switch that will activate if the scores don't seem to be improving
         killSwitch = False
 
@@ -301,15 +308,11 @@ class Graph:
 
 
             # If we have no ids that means that we are in the first generation.
-            if len(ids) == 0:
+            if generation == 0:
                 max_people, clusters = self.find_target_size_clusters()
                 clusters = random.sample(clusters,min(len(clusters),self.sample_size))
 
                 groupnumber = self.process_cluster(clusters,groupnumber,generation,parent=-1)
-
-
-               #killSwitch = True
-
             else:
 
                 # Otherwise, we have to loop through all of the groups from the previous generation
@@ -320,11 +323,8 @@ class Graph:
                     # Lets first update the graph, so that we are up to date with previous versions
                     z = list(set(grp["total_people"]))
 
-
-
                     self.update(peoplelist=grp["total_people"])
 
-                    #self.test(people=grp["total_people"])
                     self.groups, _ = self.get_group(id)
 
                     # Now lets find the clusters that we are looking for
@@ -332,9 +332,12 @@ class Graph:
 
 
 
+
                     # if we can't find anything with the target size, lets just try to make a few more groups
                     if len(clusters) == 0:
                         max_people,clusters = self.find_largest_cluster()
+
+
 
                     clusters = random.sample(clusters,min(len(clusters),20))
 
@@ -350,16 +353,13 @@ class Graph:
 
                     # Un-update so we don't contaminate results
                     self.update(peoplelist=grp["total_people"],value_change=True)
+                if len(ids) ==0:
+                    killSwitch = True
 
 
             # In order to prevent exponental increase, we need to prune the tree after each generation
             self.prune(generation=generation)
-            '''
-            if generation == 4:
-                for key in self.tree.keys():
-                    print(key,self.tree[key]["generation"],len(self.tree[key]["total_people"]))
-                killSwitch = True
-            '''
+
             if generation % 10 == 0:
                 print("Completed generation %s" % generation)
 
@@ -371,6 +371,9 @@ class Graph:
         # Get the group so we can update everything
         final_group = self.tree[id]
         self.update(peoplelist=final_group["total_people"])
+
+
+
         print("Best Group found in generation:%s" % final_group["generation"])
 
 
@@ -385,15 +388,16 @@ class Graph:
                 best_group_id = key
                 best_score =self.tree[key]["score"]
         # Also since this is the end, lets update the graph
-        groups,scores = self.get_group(best_group_id)
+        groups,scores = self.get_group(best_group_id,printtree=True)
         return best_group_id,groups,scores
 
 
-    def get_group(self,id):
+    def get_group(self,id,printtree=False):
         groups = []
         scores = []
         best_group = self.tree[id]
         while best_group["parent"] > -1:
+
             groups.append(best_group["group"])
             scores.append(best_group["score"])
             best_group = self.tree[best_group["parent"]]
@@ -428,35 +432,6 @@ class Graph:
             groupnumber = groupnumber + 1
 
         return groupnumber
-    '''
-    def match_unmatched(self,unmatched):
-        # We still have some leftover people. Lets see if we can find them a home
-
-
-        matched = []
-
-        for um in unmatched:
-            # Get all of the times that this person is free
-            times = self.peopleHash[um]
-            p_nodes = self.graph[self.key_hash(times[0]["key"])][times[0]["time"]]["PeopleAvailiable"]
-            p_node = [p for p in p_nodes if p.email == um][0]
-            killSwitch = False
-
-            # For each of those times, check to see if there is a group that is meeting
-            for t in times:
-                if not killSwitch:
-                    meeting_time = self.graph[self.key_hash(t["key"])][t["time"]]["meeting_time"]
-
-                    for g in self.groups:
-                        if g["time"] == meeting_time and g["key"] == t["key"] and not killSwitch:
-                            g["mentees"].append(p_node)
-                            killSwitch = True
-                            matched.append(p_node)
-                            break
-
-        self.update(matched)
-    '''
-
 
 
     def write_results(self,groups,scores):
@@ -472,6 +447,7 @@ class Graph:
         for u in unmatched:
             f.write(u + "\n")
         f.close()
+        print(scores)
 
 
 
@@ -502,40 +478,68 @@ class Graph:
 
         score  = 0
 
-        # Get 10 points for each group created
-        #score = score + len(self.groups) * 10
+        # Calculate the score for the number of groups ( observed/expected)
+        num_groups_score = (len(self.groups)/self.num_mentors) * 100
 
-        # Get 10 points for each group with a mentor in it
-        score = score + len([z for z in self.groups if z["mentor"] is not None]) * 10
+        groups_with_mentors = sum([1 for g in self.groups if g["mentor"].email != "None"])
+        groups_with_mentors_score = groups_with_mentors/len(self.groups)
+
+        total_group_size_score = 0
+        feature_score_total = 0
 
         # Get points based on the size of the groups
         for z in self.groups:
             group_size = len(z["mentees"])
-            larger_group = group_size % self.group_size
-            smaller_group = abs(self.group_size - group_size)
+            group_score_size = (group_size/self.group_size) * 100
+            if group_score_size > 100:
+                group_score_size = 100 - (group_score_size - 100)
+            total_group_size_score = total_group_size_score + group_score_size
 
-            penalty = pow(min(larger_group,smaller_group),1.25)
-            score = score - penalty
 
-            # Get a bonus if the group is exactly the size that we want
-            score = score + 20
+
 
             # Lets check the additional features to see if we were able to account for those
             #  since they are additional, lets add points instead of substracting them
             if len(z["mentees"]) > 0:
                 feature_keys = z["mentees"][0].feature_dict
-                for key in feature_keys:
-                    feature_score = sum([m.feature_dict[key] for m in z["mentees"]])
-                    feature_score = feature_score + z["mentor"].feature_dict[key]
-                    score + feature_score
+                if len(feature_keys) > 0:
+                    feature_score = 0
+                    for key in feature_keys:
+                        feature_score = feature_score + sum([m.feature_dict[key] for m in z["mentees"]])
+                        feature_score = feature_score + z["mentor"].feature_dict[key]
+                    feature_score_total = feature_score_total + (feature_score/len(feature_keys) * 100)
+                else:
+                    feature_score_total = 100
 
+        total_group_size_score = total_group_size_score/len(self.groups)
+        feature_score_total = feature_score_total/len(self.groups)
 
+        unmatched_score = (1 - len(self.find_unmatched_mentees())/len(self.peopleHash.keys())) * 100
 
+        # Calculate the score based on the 4 categories we have
+        #  - unmatched people
+        #  - feature score
+        #  - num groups
+        #  - group size
 
-        # Lose points for mentees that are left over
-        score = score - pow(len(self.find_unmatched_mentees()),2)
+        # The most important thing is that as many of the people as possible get matched to a group
+        #   Thus, the unmatched mentee score weight should be high
+        score = unmatched_score * .45
 
+        # Second most important is group size. We want things to be as balanced as possible
+        score = score + total_group_size_score * .15
 
+        # Third most important is the number of groups
+        score = score + num_groups_score * .05
+
+        score = score + groups_with_mentors_score * .2
+
+        # Finally, we the feature score needs to be added
+        score = score + feature_score_total * .15
+
+        # The max score that a group can get is 100
+
+        #print(unmatched_score,total_group_size_score,num_groups_score,feature_score_total)
 
 
         return score
