@@ -1,0 +1,5 @@
+DateTime==4.3
+docutils==0.16
+pytz==2020.5
+statistics==1.0.3.5
+zope.interface==5.2.0

@@ -68,3 +68,4 @@ class Emailer:
 
 if __name__ == "__main___":
     e = Emailer()
+    print("Still in development. Please check back later!")

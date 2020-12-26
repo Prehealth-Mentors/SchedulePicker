@@ -15,7 +15,7 @@ Some highlights to the file format are listed below
 - The program allows for optional binary features to be inserted here. These features can be things such as onlineOnly, or isTransfer student. The program will try to optimize these features if possible.
 
 - The remaining rows are the days of the week and times that the person is availiable. These entries must be comma seperated and be in the following format.
-   - <day of the week>:<start time>-<end time>, ...
+   - day of the week:start time-end time, ...
    - Ex: M:2:00PM-4:00PM,T:10:0AM-5:00PM
 
 ## How to run
@@ -34,13 +34,14 @@ Some highlights to the file format are listed below
     - `python3 main.py -h`
 
 ## Output
-The program outputs to two files: **groups.csv** and **unmatched.csv**. The groups.txt file contains the Meeting Day, Meeting Time, Mentor,Mentees for each group. This file is csv file which can then be opened in excel. Unmatched.csv
-contains people who the program was unable to find a group for based on their availibility. The program tries to
-keep the group sizes as even as possible by
+The program outputs to two files: **groups.csv** and **unmatched.csv**. The groups.csv file contains the Meeting Day, Meeting Time, Mentor,Mentees for each group. This file is csv file which can then be opened in excel. Unmatched.csv
+contains people who the program was unable to find a group for based on their availibility.
 
 ## Additional Cool Stuff
 In order to test the program with sample data, there is a python program included that will generate random data.
 It is called `datagen.py`. In order to run it, simply run `python3 datagen.py`
+
+There is also a file that will send emails based on the results of groups.csv called emailer.py. It can be run either by running `python3 emailer.py` or by specifiying the `--send_emails` flag when running main.py. The emailer requires a gmail account credentials in order to run. For security purposes, this information must be stored in the config.txt which is not included in version control. The first time you run the emailer program, this file will be created for you. Please just fill it out.
 
 ## FAQs
 There might be some issues with the commands listed in this document. This program and commands were written based on
@@ -57,3 +58,13 @@ the MacOS operating system. Some common issues are listed below.
 
 - program crashes
   - your data is in the incorrect format or the program writers messed up. Check your data first and if it still doesn't work then send an email to whoever is in charge of this to get it fixed.
+
+- Package not installed error
+  - All of the packages used in this project should be installed in a default python installation. However, just in case a requirements.txt file is provided. To use it run the following commands
+      - Install pip: https://pip.pypa.io/en/stable/installing/
+      - Install virtualenv: `pip3 install virtualenv`
+      - Create the virtualenv: `virtualenv venv`
+      - Start the vritualenv: `source venv/bin/activate`
+      - Install packages: `pip3 install -r requirements.txt`
+      - Run the program normally
+
