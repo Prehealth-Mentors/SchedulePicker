@@ -58,7 +58,9 @@ class Emailer:
         """ % (fro,",".join(to),mentor_name,",".join(mentee_names),day,time)
         return email_text
 
-    def send_email(self):
+    def send_email(self,sent_from,to):
+        self.server.sendmail(sent_from, to, "")
+
 
 
 

@@ -29,6 +29,13 @@ class Graph:
 
         self.sample_size = sample_size
 
+        # Set default score breakdown
+        self.uw = .45
+        self.gsw = .15
+        self.ngw = .25
+        self.fw = .15
+
+
         # To do this, lets first create a dictionary with all of the days of the week
         self.graph = {
             "M":[],
@@ -154,7 +161,6 @@ class Graph:
         # Calculate the target group size based on the mentor mentee ratio
         self.group_size = int((len(peopleHash.keys()) - num_mentors)/num_mentors) + 1
         self.num_mentors =num_mentors
-        print("Group Size:%s" % self.group_size)
 
         return peopleHash
 
@@ -263,9 +269,6 @@ class Graph:
         k = self.peopleHash.keys()
         a = [p for p in k if self.peopleHash[p].isOpen == False]
         assert(len(people) ==len(a))
-
-
-
 
 
     def write_graph(self):
@@ -462,6 +465,16 @@ class Graph:
         return list(set(left_over_people))
 
 
+    def set_score_args(self,uw,gsw,ngw,fw):
+        # CHeck to make sure that the total of the arguments equals 1
+        if uw + gsw + ngw + fw != 1:
+            print("WARNING: Score arguments do not equal 1. Using default arguments")
+        else:
+            self.uw = uw
+            self.gsw = gsw
+            self.ngw = ngw
+            self.fw = fw
+
 
 
     def calculate_score(self):
@@ -480,9 +493,6 @@ class Graph:
 
         # Calculate the score for the number of groups ( observed/expected)
         num_groups_score = (len(self.groups)/self.num_mentors) * 100
-
-        groups_with_mentors = sum([1 for g in self.groups if g["mentor"].email != "None"])
-        groups_with_mentors_score = groups_with_mentors/len(self.groups)
 
         total_group_size_score = 0
         feature_score_total = 0
@@ -507,9 +517,22 @@ class Graph:
                     for key in feature_keys:
                         feature_score = feature_score + sum([m.feature_dict[key] for m in z["mentees"]])
                         feature_score = feature_score + z["mentor"].feature_dict[key]
-                    feature_score_total = feature_score_total + (feature_score/len(feature_keys) * 100)
+                    # Get the average score for all of the features
+                    feature_score = feature_score/len(feature_keys)
+
+                    # Here's where things get tricky. We want the feature score to be bimodal (scores closer to 0 and 1 should be
+                    #  higher than scores closer to .5)
+                    if feature_score < .5:
+                        feature_score = .5 - feature_score
+                    else:
+                        feature_score = feature_score - .5
+
+                    # However, we still need this to be out of 100 so lets multiply by 200
+                    feature_score = feature_score * 200
+
+                    feature_score_total = feature_score_total + feature_score
                 else:
-                    feature_score_total = 100
+                    feature_score_total =  feature_score_total + 100
 
         total_group_size_score = total_group_size_score/len(self.groups)
         feature_score_total = feature_score_total/len(self.groups)
@@ -524,18 +547,17 @@ class Graph:
 
         # The most important thing is that as many of the people as possible get matched to a group
         #   Thus, the unmatched mentee score weight should be high
-        score = unmatched_score * .45
+        score = unmatched_score * self.uw
 
         # Second most important is group size. We want things to be as balanced as possible
-        score = score + total_group_size_score * .15
+        score = score + total_group_size_score * self.gsw
 
         # Third most important is the number of groups
-        score = score + num_groups_score * .05
+        score = score + num_groups_score * self.ngw
 
-        score = score + groups_with_mentors_score * .2
 
         # Finally, we the feature score needs to be added
-        score = score + feature_score_total * .15
+        score = score + feature_score_total * self.fw
 
         # The max score that a group can get is 100
 

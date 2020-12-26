@@ -12,6 +12,8 @@ the data is not provided in a correct format.
 Some highlights to the file format are listed below
 - First row needs to be email and **only** email. The program does not accept names
 - Second row is a binary (0 or 1) value specifying if the person is a mentor or mentee. 1 means mentor 0 means mentee
+- The program allows for optional binary features to be inserted here. These features can be things such as onlineOnly, or isTransfer student. The program will try to optimize these features if possible.
+
 - The remaining rows are the days of the week and times that the person is availiable. These entries must be comma seperated and be in the following format.
    - <day of the week>:<start time>-<end time>, ...
    - Ex: M:2:00PM-4:00PM,T:10:0AM-5:00PM
@@ -34,7 +36,7 @@ Some highlights to the file format are listed below
 ## Output
 The program outputs to two files: **groups.csv** and **unmatched.csv**. The groups.txt file contains the Meeting Day, Meeting Time, Mentor,Mentees for each group. This file is csv file which can then be opened in excel. Unmatched.csv
 contains people who the program was unable to find a group for based on their availibility. The program tries to
-keep the group sizes as even as possible by 
+keep the group sizes as even as possible by
 
 ## Additional Cool Stuff
 In order to test the program with sample data, there is a python program included that will generate random data.
