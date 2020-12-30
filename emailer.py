@@ -6,12 +6,15 @@
 
 # Imports
 import smtplib
+from email.message import EmailMessage
+import csv
 
 class Emailer:
     def __init__(self):
+
         # Open the config file and load the username and password
         try:
-            f = open("config2.txt","r")
+            f = open("config.txt","r")
         except:
             f = open("config.txt",'w')
             f.write("gmail_username= \ngmail_password= \n")
@@ -23,21 +26,23 @@ class Emailer:
         assert(len(config_data) > 2)
         gmail_username = config_data[0].split("=")[1]
         gmail_password = config_data[1].split("=")[1]
+        self.username = gmail_username
+
 
         try:
             self.server = smtplib.SMTP('smtp.gmail.com', 587)
             self.server.ehlo()
             self.server.starttls()
-            self.server.login(gmail_user, gmail_password)
-        except:
-            print('Something went wrong...')
+            self.server.login(gmail_username, gmail_password)
 
-    def template_string(self,fro,to,mentor_name,mentee_names,day,time):
-        email_text = """\
-            From: %s
-            To: %s
-            Subject: PHP Peer Group Assignments
+        except Exception as e:
+            print(e)
 
+
+    def template_string(self,to,mentor_name,mentee_names,day,time):
+        msg = EmailMessage()
+
+        content = """\
             Hi,
 
             This email has been sent to inform you that you have been matched to a
@@ -53,19 +58,57 @@ class Emailer:
             Thanks,
 
             The PreHealth Mentor Matching Team
+        """ % (mentor_name,",".join(mentee_names),day,time)
+        msg.set_content(content)
+        msg["Subject"] = "Prehealth Peer Groups"
+        msg["From"] = self.username
+        msg["To"] = ",".join(to)
+        return msg
+
+    def close(self):
+        self.server.quit()
+
+    def read_file(self):
+        # This program defaults to reading the groups.csv file.
+        with open('groups.csv', newline='') as csvfile:
+            firstRow = True
+            data_dicts = []
+            header = dict()
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                if firstRow:
+                    for i in range(0,len(row)):
+                        header[i] = row[i].strip()
+                    firstRow = False
+
+                else:
+                    group_dict = dict()
+                    for i in range(0,len(row)):
+                        group_dict[header[i]] = row[i]
+                    data_dicts.append(group_dict)
+        return data_dicts
 
 
-        """ % (fro,",".join(to),mentor_name,",".join(mentee_names),day,time)
-        return email_text
-
-    def send_email(self,sent_from,to):
-        self.server.sendmail(sent_from, to, "")
 
 
 
+    def send_email(self):
+        data_dicts = self.read_file()
+        for d in data_dicts:
+            to = d["Mentor"] + " " + d["Mentees"]
+            to = to.split(" ")
+
+            mentor_name = d["Mentor"].split("@")[0]
+            mentees = d["Mentees"].split(" ")
+            mentees = [e.split("@")[0] for e in mentees]
+
+            msg = self.template_string(to,mentor_name,mentees,d["Day"],d["Time"])
+            self.server.send_message(msg)
 
 
 
-if __name__ == "__main___":
+if __name__ =="__main__":
     e = Emailer()
-    print("Still in development. Please check back later!")
+    e.send_email()
+    e.close()
+

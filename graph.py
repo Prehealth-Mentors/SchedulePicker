@@ -439,7 +439,7 @@ class Graph:
 
     def write_results(self,groups,scores):
         f = open("groups.csv","w")
-        f.write("Meeting Day, Meeting Time, Mentor,Mentees\n")
+        f.write("Day,Time,Mentor,Mentees\n")
         for g in groups:
             mentee_list = " ".join([z.email for z in g["mentees"]])
             f.write("%s,%s,%s,%s\n" % (g["key"],g["time"],g["mentor"].email,mentee_list))

@@ -5,6 +5,7 @@
 # Imports
 import argparse
 from graph import Graph
+from emailer import Emailer
 
 # Functions
 def main(args):
@@ -12,6 +13,10 @@ def main(args):
     # Set the score arguements
     g.set_score_args(args.unmatched_weight,args.groupsize_weight,args.num_groups_weight,args.feature_weight)
     g.run(generation_cap=args.max_generations)
+    if args.send_emails:
+        e = Emailer()
+        e.send_email()
+        e.close()
 
 
 if __name__ =="__main__":
@@ -25,6 +30,7 @@ if __name__ =="__main__":
     parser.add_argument('--max_generations', metavar='-m', type=int,nargs='?', default=500, help='the maximum number of generations. Defaults to 500')
     parser.add_argument('--weekend_meetings', metavar='-w', type=bool,nargs='?', default=False,const=True, help='weekend meetings')
     parser.add_argument('--sample_size', metavar='-s', type=int,nargs='?', default=25,const=25, help='The sample size of each generation. Larger values will result in higher accuracy. Lower values will result in higher speed.')
+    parser.add_argument('--send_emails', metavar='-se', type=bool,nargs='?', default=False,const=True, help='Send emails immediately after running the program. (Not recommended)')
 
     # Score args
     scoreargs = parser.add_argument_group('score args')
