@@ -262,6 +262,16 @@ class Graph:
             self.groups = self.groups[0:len(self.groups) -1]
             self.update(peoplelist=peoplelist,value_change=True)
 
+        # Lets add in the score for our special features to the group object. Just so that we can save it
+        if len(best_group["mentees"]) > 0:
+            feature_keys = best_group["mentees"][0].feature_dict
+            if len(feature_keys) > 0:
+                for key in feature_keys:
+                    feature_score =  sum([m.feature_dict[key] for m in best_group["mentees"]])
+                    feature_score = feature_score + best_group["mentor"].feature_dict[key]
+                    feature_score = feature_score/(len(best_group["mentees"]) + 1)
+                    best_group[key] = feature_score
+
         # Finally return the score
         return best_score,best_group
 
@@ -376,14 +386,16 @@ class Graph:
         self.update(peoplelist=final_group["total_people"])
 
 
-
         print("Best Group found in generation:%s" % final_group["generation"])
-
-
 
         self.write_results(groups,scores)
         return scores[0]
-
+    def print_group(self,group):
+        keys = group.keys()
+        badkeys = ["total_people","mentees","mentor"]
+        for k in keys:
+            if k not in badkeys:
+                print(group[k])
     def get_highest(self):
         best_score = float('-inf')
         best_group_id = 0
@@ -440,10 +452,19 @@ class Graph:
 
     def write_results(self,groups,scores):
         f = open("groups.csv","w")
-        f.write("Day,Time,Mentor,Mentees\n")
+        f.write("Day,Time,Mentor,Mentees,AdditionalFeatures\n")
         for g in groups:
             mentee_list = " ".join([z.email for z in g["mentees"]])
-            f.write("%s,%s,%s,%s\n" % (g["key"],g["time"],g["mentor"].email,mentee_list))
+            # Add all of the additonal features
+            keys = g.keys()
+            badkeys = ["key","time","mentor","mentees"]
+            features = ""
+            for k in keys:
+                if k not in badkeys:
+                    if float(g[k]) > .85:
+                        features = features +" "+ k
+
+            f.write("%s,%s,%s,%s,%s\n" % (g["key"],g["time"],g["mentor"].email,mentee_list,features))
         f.close()
         f = open("unmatched.csv","w")
         unmatched = self.find_unmatched_mentees()
@@ -451,10 +472,6 @@ class Graph:
         for u in unmatched:
             f.write(u + "\n")
         f.close()
-        print(scores)
-
-
-
 
     def find_unmatched_mentees(self):
         left_over_people = []
@@ -475,8 +492,6 @@ class Graph:
             self.gsw = gsw
             self.ngw = ngw
             self.fw = fw
-
-
 
     def calculate_score(self):
         # The score is used to see how close to a solution we have gotten to
@@ -514,24 +529,29 @@ class Graph:
             if len(z["mentees"]) > 0:
                 feature_keys = z["mentees"][0].feature_dict
                 if len(feature_keys) > 0:
-                    feature_score = 0
+                    total_feature_score = 0
                     for key in feature_keys:
-                        feature_score = feature_score + sum([m.feature_dict[key] for m in z["mentees"]])
+
+                        feature_score =  sum([m.feature_dict[key] for m in z["mentees"]])
                         feature_score = feature_score + z["mentor"].feature_dict[key]
+                        feature_score = feature_score/(len(z["mentees"]) + 1)
+                        total_feature_score = total_feature_score + feature_score
                     # Get the average score for all of the features
-                    feature_score = feature_score/len(feature_keys)
+                    total_feature_score = feature_score/len(feature_keys)
 
                     # Here's where things get tricky. We want the feature score to be bimodal (scores closer to 0 and 1 should be
                     #  higher than scores closer to .5)
-                    if feature_score < .5:
-                        feature_score = .5 - feature_score
+                    if total_feature_score < .5:
+                        total_feature_score = .5 - total_feature_score
                     else:
-                        feature_score = feature_score - .5
+                        total_feature_score = total_feature_score - .5
 
                     # However, we still need this to be out of 100 so lets multiply by 200
-                    feature_score = feature_score * 200
+                    total_feature_score = total_feature_score * 200
+                    min(total_feature_score,100)
 
-                    feature_score_total = feature_score_total + feature_score
+
+                    feature_score_total = feature_score_total + total_feature_score
                 else:
                     feature_score_total =  feature_score_total + 100
 
@@ -545,19 +565,23 @@ class Graph:
         #  - feature score
         #  - num groups
         #  - group size
-
+        assert(self.uw + self.gsw + self.ngw +  self.fw == 1)
         # The most important thing is that as many of the people as possible get matched to a group
         #   Thus, the unmatched mentee score weight should be high
+        assert(unmatched_score < 101)
         score = unmatched_score * self.uw
 
         # Second most important is group size. We want things to be as balanced as possible
+        assert(total_group_size_score < 101)
         score = score + total_group_size_score * self.gsw
 
         # Third most important is the number of groups
+        assert(num_groups_score < 101)
         score = score + num_groups_score * self.ngw
 
 
         # Finally, we the feature score needs to be added
+        assert(feature_score_total < 101)
         score = score + feature_score_total * self.fw
 
         # The max score that a group can get is 100

@@ -13,10 +13,12 @@ def main(args):
     # Set the score arguements
     g.set_score_args(args.unmatched_weight,args.groupsize_weight,args.num_groups_weight,args.feature_weight)
     best_score = g.run(generation_cap=args.max_generations)
+    print(best_score)
     if args.send_emails or best_score >= args.emails_theshold:
-        e = Emailer()
-        e.send_email()
-        e.close()
+        print("Sending emails",best_score,args.emails_theshold)
+        #e = Emailer()
+        #e.send_email()
+        #e.close()
 
 
 if __name__ =="__main__":
@@ -34,7 +36,7 @@ if __name__ =="__main__":
     # Email Arguments
     emailargs = parser.add_argument_group('email args')
     emailargs.add_argument('--send_emails', metavar='-se', type=bool,nargs='?', default=False,const=True, help='Send emails immediately after running the program. (Not recommended)')
-    emailargs.add_argument('--emails_theshold', metavar='-et', type=float,nargs='?', default=1,const=.90, help='Send emails if the final score is greater than or equal to a threshold.')
+    emailargs.add_argument('--emails_theshold', metavar='-et', type=float,nargs='?', default=100,const=90, help='Send emails if the final score is greater than or equal to a threshold.')
 
 
 

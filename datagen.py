@@ -142,10 +142,10 @@ class DataGen:
             num_days = random.randint(1,7)
             times = self.create_times(num_days)
 
-            only_online = random.randint(1,20) < 3
+            only_online = random.randint(1,20) < 5
             only_online = 1 if only_online else 0
 
-            transfer = random.randint(1,20) < 2
+            transfer = random.randint(1,20) < 5
             transfer = 1 if transfer else 0
 
 
@@ -162,7 +162,7 @@ if __name__== "__main__":
 
     dg = DataGen()
     #dg.format_real_data("realdata/mentors.csv","realdata/mentees.csv")
-    dg.create_fake_data()
+    dg.create_fake_data(num_mentees=500,num_mentors=50)
 
 
 
