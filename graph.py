@@ -541,17 +541,10 @@ class Graph:
 
                     # Here's where things get tricky. We want the feature score to be bimodal (scores closer to 0 and 1 should be
                     #  higher than scores closer to .5)
-                    if total_feature_score < .5:
-                        total_feature_score = .5 - total_feature_score
-                    else:
-                        total_feature_score = total_feature_score - .5
-
-                    # However, we still need this to be out of 100 so lets multiply by 200
-                    total_feature_score = total_feature_score * 200
-                    min(total_feature_score,100)
 
 
-                    feature_score_total = feature_score_total + total_feature_score
+
+                    feature_score_total = feature_score_total + (abs(.5 - total_feature_score)  * 100)
                 else:
                     feature_score_total =  feature_score_total + 100
 
