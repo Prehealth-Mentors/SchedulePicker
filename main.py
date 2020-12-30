@@ -12,8 +12,8 @@ def main(args):
     g = Graph(args.input_file[0],meeting_duration=args.meeting_duration,weekend_meetings=args.weekend_meetings,earliest_time=args.earliest_time,latest_time=args.latest_time,sample_size=args.sample_size)
     # Set the score arguements
     g.set_score_args(args.unmatched_weight,args.groupsize_weight,args.num_groups_weight,args.feature_weight)
-    g.run(generation_cap=args.max_generations)
-    if args.send_emails:
+    best_score = g.run(generation_cap=args.max_generations)
+    if args.send_emails or best_score >= args.emails_theshold:
         e = Emailer()
         e.send_email()
         e.close()
@@ -30,7 +30,13 @@ if __name__ =="__main__":
     parser.add_argument('--max_generations', metavar='-m', type=int,nargs='?', default=500, help='the maximum number of generations. Defaults to 500')
     parser.add_argument('--weekend_meetings', metavar='-w', type=bool,nargs='?', default=False,const=True, help='weekend meetings')
     parser.add_argument('--sample_size', metavar='-s', type=int,nargs='?', default=25,const=25, help='The sample size of each generation. Larger values will result in higher accuracy. Lower values will result in higher speed.')
-    parser.add_argument('--send_emails', metavar='-se', type=bool,nargs='?', default=False,const=True, help='Send emails immediately after running the program. (Not recommended)')
+
+    # Email Arguments
+    emailargs = parser.add_argument_group('email args')
+    emailargs.add_argument('--send_emails', metavar='-se', type=bool,nargs='?', default=False,const=True, help='Send emails immediately after running the program. (Not recommended)')
+    emailargs.add_argument('--emails_theshold', metavar='-et', type=float,nargs='?', default=1,const=.90, help='Send emails if the final score is greater than or equal to a threshold.')
+
+
 
     # Score args
     scoreargs = parser.add_argument_group('score args')

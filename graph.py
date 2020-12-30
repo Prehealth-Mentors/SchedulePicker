@@ -382,6 +382,7 @@ class Graph:
 
 
         self.write_results(groups,scores)
+        return scores[0]
 
     def get_highest(self):
         best_score = float('-inf')
