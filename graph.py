@@ -22,7 +22,7 @@ class Node:
 
 
 class Graph:
-    def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM",sample_size=25):
+    def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM",sample_size=25,group_size=None,time_delta=15):
         # We need to construct a graphical matrix representation for the possible times and
         #  days that there could possbily be meetings for.
         self.time_format = "%I:%M%p"
@@ -59,13 +59,12 @@ class Graph:
         while meeting_time + timedelta(hours=duration_hours,minutes=duration_minutes) < datetime.strptime(latest_time, self.time_format):
             for g in self.graph.keys():
                 self.graph[g].append({"meeting_time":meeting_time.strftime(self.time_format),"PeopleAvailiable":[], "beginning":meeting_time,"ending":meeting_time + timedelta(hours=duration_hours,minutes=duration_minutes)})
-            meeting_time = meeting_time + timedelta(minutes=15)
+            meeting_time = meeting_time + timedelta(minutes=time_delta)
 
         # After we have constructed the graph object, lets read in all of the data to the graph
         self.peopleHash = self.readfile(filename)
-
-
-
+        if group_size != None:
+            self.group_size = group_size
 
 
     def key_hash(self,key):
@@ -160,6 +159,7 @@ class Graph:
 
         # Calculate the target group size based on the mentor mentee ratio
         self.group_size = int((len(peopleHash.keys()) - num_mentors)/num_mentors) + 1
+
         self.num_mentors =num_mentors
 
         return peopleHash
@@ -222,9 +222,7 @@ class Graph:
         mentors = [n for n in obj["PeopleAvailiable"] if n.isMentor == True and n.isOpen == True]
 
         # Split the mentees into equal group sizes. TODO: possibly shuffling the people around might increase the score
-        mentees = [n for n in obj["PeopleAvailiable"] if n.isMentor == False]
-
-        mentees = [m for m in mentees if m.isOpen == True]
+        mentees = [n for n in obj["PeopleAvailiable"] if n.isMentor == False and n.isOpen == True]
 
         # Shuffle up the mentees so that we get a better version
         random.shuffle(mentees)
@@ -238,11 +236,11 @@ class Graph:
         best_score = float('-inf')
 
         for me in mentees_list:
-            mentor = Node("None",True,False)
+            mentor = [Node("None",True,False)]
             peoplelist = me
             if len(mentors) > 0:
-                mentor = mentors[0]
-                peoplelist = peoplelist + [mentor]
+                mentor = mentors[0:self.mentors_per_group]
+                peoplelist = peoplelist + mentor
 
             group = {"key":key,"time":ti,"mentor":mentor,"mentees":me}
 
@@ -268,7 +266,7 @@ class Graph:
             if len(feature_keys) > 0:
                 for key in feature_keys:
                     feature_score =  sum([m.feature_dict[key] for m in best_group["mentees"]])
-                    feature_score = feature_score + best_group["mentor"].feature_dict[key]
+                    #feature_score = feature_score + best_group["mentor"].feature_dict[key]
                     feature_score = feature_score/(len(best_group["mentees"]) + 1)
                     best_group[key] = feature_score
 
@@ -289,11 +287,19 @@ class Graph:
                     p = [pp.email for pp in i["PeopleAvailiable"] if pp.isOpen==True]
                     print(g,i["meeting_time"]," ".join(p))
 
-    def run(self,generation_cap=500):
+    def run(self,generation_cap=500,mentors_per_group=1):
         # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
         #  in the graph and remove them.
         # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
         # acceptable score.
+        self.mentors_per_group = mentors_per_group
+
+        # Group size has to change if we have multiple mentors per group
+        self.group_size = self.group_size * self.mentors_per_group
+
+
+
+        # We have to de
 
         # Create an array to hold the groups that we created
         self.groups = []
@@ -306,7 +312,8 @@ class Graph:
 
         total_people = len(self.peopleHash.keys())
 
-        print("Running optomization... This might take a while")
+        print("Running optomization targeting a group size of %d... This might take a while" % self.group_size)
+
         self.tree = dict()
         groupnumber = 0
         while not killSwitch and generation < generation_cap:
@@ -444,7 +451,7 @@ class Graph:
         for cluster in clusters:
 
             score,group = self.make_group(cluster["str_time"],cluster["key"])
-            self.tree[groupnumber] = {"parent":parent,"group": group,"score":score,"generation":generation,"total_people":group["mentees"] + [group["mentor"]] + prevpeople}
+            self.tree[groupnumber] = {"parent":parent,"group": group,"score":score,"generation":generation,"total_people":group["mentees"] + group["mentor"] + prevpeople}
             groupnumber = groupnumber + 1
 
         return groupnumber
@@ -455,6 +462,7 @@ class Graph:
         f.write("Day,Time,Mentor,Mentees,AdditionalFeatures\n")
         for g in groups:
             mentee_list = " ".join([z.email for z in g["mentees"]])
+            mentor_list = " ".join([z.email for z in g["mentor"]])
             # Add all of the additonal features
             keys = g.keys()
             badkeys = ["key","time","mentor","mentees"]
@@ -464,7 +472,7 @@ class Graph:
                     if float(g[k]) > .85:
                         features = features +" "+ k
 
-            f.write("%s,%s,%s,%s,%s\n" % (g["key"],g["time"],g["mentor"].email,mentee_list,features))
+            f.write("%s,%s,%s,%s,%s\n" % (g["key"],g["time"],mentor_list,mentee_list,features))
         f.close()
         f = open("unmatched.csv","w")
         unmatched = self.find_unmatched_mentees()
@@ -508,7 +516,9 @@ class Graph:
         score  = 0
 
         # Calculate the score for the number of groups ( observed/expected)
-        num_groups_score = (len(self.groups)/self.num_mentors) * 100
+        num_groups_score = (len(self.groups)/(self.num_mentors/self.mentors_per_group)) * 100
+        if num_groups_score > 100:
+         num_groups_score = 100 - (num_groups_score % 100)
 
         total_group_size_score = 0
         feature_score_total = 0
@@ -533,8 +543,9 @@ class Graph:
                     for key in feature_keys:
 
                         feature_score =  sum([m.feature_dict[key] for m in z["mentees"]])
-                        feature_score = feature_score + z["mentor"].feature_dict[key]
-                        feature_score = feature_score/(len(z["mentees"]) + 1)
+                        # TODO: Fix this
+                        #feature_score = feature_score + z["mentor"].feature_dict[key]
+                        feature_score = feature_score/(len(z["mentees"]) )#+ 1)
                         total_feature_score = total_feature_score + feature_score
                     # Get the average score for all of the features
                     total_feature_score = feature_score/len(feature_keys)
