@@ -29,6 +29,8 @@ class Graph:
 
         self.sample_size = sample_size
 
+        self.group_split_size = 10
+
         # Set default score breakdown
         self.uw = .45
         self.gsw = .15
@@ -228,8 +230,18 @@ class Graph:
         random.shuffle(mentees)
         random.shuffle(mentors)
         mentees_list = [mentees[0:self.group_size]]
-        mentees_list = mentees_list + [mentees[0:min(len(mentees),int(self.group_size*1.5))]]
-        mentees_list = mentees_list + [mentees[0:int(self.group_size*.5)]]
+
+        # We want to experiment with differing group sizes to get a better score
+
+        # Lets pick group_split_size number of samples
+        for i in range(0,self.group_split_size):
+            end_size = int(self.group_size * 1.5)
+            if end_size > len(mentees):
+                end_size = len(mentees)
+            mentees_list = mentees_list + [random.sample(mentees,random.randint(0,end_size))]
+
+        #mentees_list = mentees_list + [mentees[0:min(len(mentees),int(self.group_size*1.5))]]
+        #mentees_list = mentees_list + [mentees[0:int(self.group_size*.5)]]
 
 
         best_group = None
