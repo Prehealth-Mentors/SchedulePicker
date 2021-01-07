@@ -10,6 +10,7 @@ import time
 import random
 import copy
 import statistics
+from io import StringIO
 
 class Node:
     def __init__(self,email,isMentor,isOpen):
@@ -22,7 +23,7 @@ class Node:
 
 
 class Graph:
-    def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM",sample_size=25,group_size=None,time_delta=15):
+    def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM",sample_size=25,group_size=None,time_delta=15,contents=None):
         # We need to construct a graphical matrix representation for the possible times and
         #  days that there could possbily be meetings for.
         self.time_format = "%I:%M%p"
@@ -48,6 +49,7 @@ class Graph:
             "S":[],
             "N":[]
         }
+        self.weekend_meetings = weekend_meetings
         if weekend_meetings:
             self.graph["S"] = []
             self.graph["N"] = []
@@ -64,9 +66,16 @@ class Graph:
             meeting_time = meeting_time + timedelta(minutes=time_delta)
 
         # After we have constructed the graph object, lets read in all of the data to the graph
-        self.peopleHash = self.readfile(filename)
+        self.peopleHash = self.readfile(filename,contents=contents)
         if group_size != None:
             self.group_size = group_size
+
+        # For some reason weekend meetings are appearing so delete them
+        if not weekend_meetings:
+            del self.graph["S"]
+            del self.graph["N"]
+
+        print(self.graph.keys())
 
 
     def key_hash(self,key):
@@ -98,66 +107,76 @@ class Graph:
         key = key.strip()
         return hash_thing[key.lower()]
 
-    def readfile(self,filename):
+    def readfile(self,filename,contents=None):
         peopleHash = {}
         num_mentors = 0
         is_first = True
-        with open(filename, newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-            feature_dict = dict()
-            for row in spamreader:
-                if is_first:
-                    is_first = False
-                    counter = 0
-                    for r in row:
-                        feature_dict[r.lower().strip()] = counter
-                        counter  = counter + 1
 
-                    # Check to make sure that times is the last field in the header row. Since
-                    #  there can be more than one time, this must be the case
+        spamreader = contents
 
-                    assert(feature_dict["times"] == counter - 1)
-
-                else:
-                    # The first element of the table should be the email address of the person
-                    email = row[feature_dict["email"]]
-
-                    # The second row should be if they are a mentor or not
-                    num_mentors = num_mentors + int(row[feature_dict["ismentor"]])
-                    isMentor = row[feature_dict["ismentor"]] == '1'
-
-                    # Finally check to see if there are any additional features that we need to be aware of
+        # If we have the contents of the file instead of the filename, convert file to something we can use
+        if contents is  None:
+            csvfile = open(filename, newline='')
+            spamreader = csvfile.read()
+            csvfile.close()
+        spamreader = spamreader.split("\n")
 
 
+        feature_dict = dict()
+        for row in spamreader:
+            row = row.split(",")
+            if is_first:
+                is_first = False
+                counter = 0
+                print(row)
+                for r in row:
+                    feature_dict[r.lower().strip()] = counter
+                    counter  = counter + 1
 
-                    node = Node(email,isMentor,True)
+                # Check to make sure that times is the last field in the header row. Since
+                #  there can be more than one time, this must be the case
+                assert(feature_dict["times"] == counter - 1)
 
-                    key_list =  [key for key in feature_dict.keys() if key != "email" and key != "times" and key != "ismentor"]
+            else:
+                # The first element of the table should be the email address of the person
+                email = row[feature_dict["email"]]
 
-                    for key in key_list:
-                        node.feature_dict[key] = row[feature_dict[key]]  == '1'
-                    peopleHash[email] = node
+                # The second row should be if they are a mentor or not
+                num_mentors = num_mentors + int(row[feature_dict["ismentor"]])
+                isMentor = row[feature_dict["ismentor"]] == '1'
 
-                    # The final rows should be the times that the person is availiable
-                    for z in row[2:]:
-                        # First get the day
-                        sp = z.split(":")
+                # Finally check to see if there are any additional features that we need to be aware of
 
-                        if len(sp) > 1:
-                            day = sp[0]
 
-                            # Now get the times
 
-                            times = ":".join(sp[1:]).split("-")
-                            beginning = datetime.strptime(times[0], self.time_format)
-                            ending = datetime.strptime(times[1], self.time_format)
+                node = Node(email,isMentor,True)
 
-                            # Bad news is that this is a range, so we have to check to see which durations we can fit in
-                            for g in range(0,len(self.graph[self.key_hash(day)])):
-                                ti = self.graph[self.key_hash(day)][g]
-                                if ti["beginning"] >= beginning and ti["ending"] <= ending:
-                                    ti["PeopleAvailiable"].append(node)
-                                    assert(node == ti["PeopleAvailiable"][len(ti["PeopleAvailiable"])-1])
+                key_list =  [key for key in feature_dict.keys() if key != "email" and key != "times" and key != "ismentor"]
+
+                for key in key_list:
+                    node.feature_dict[key] = row[feature_dict[key]]  == '1'
+                peopleHash[email] = node
+
+                # The final rows should be the times that the person is availiable
+                for z in row[2:]:
+                    # First get the day
+                    sp = z.split(":")
+
+                    if len(sp) > 1:
+                        day = sp[0]
+
+                        # Now get the times
+
+                        times = ":".join(sp[1:]).split("-")
+                        beginning = datetime.strptime(times[0], self.time_format)
+                        ending = datetime.strptime(times[1], self.time_format)
+
+                        # Bad news is that this is a range, so we have to check to see which durations we can fit in
+                        for g in range(0,len(self.graph[self.key_hash(day)])):
+                            ti = self.graph[self.key_hash(day)][g]
+                            if ti["beginning"] >= beginning and ti["ending"] <= ending and self.weekend_check(day):
+                                ti["PeopleAvailiable"].append(node)
+                                assert(node == ti["PeopleAvailiable"][len(ti["PeopleAvailiable"])-1])
 
         # Calculate the target group size based on the mentor mentee ratio
         self.group_size = int((len(peopleHash.keys()) - num_mentors)/num_mentors) + 1
@@ -165,6 +184,12 @@ class Graph:
         self.num_mentors =num_mentors
 
         return peopleHash
+
+    def weekend_check(self,day):
+        good = True
+        if self.weekend_meetings is False and (self.key_hash(day) == "s" or self.key_hash(day) == "n"):
+            good = False
+        return good
 
 
 
@@ -299,7 +324,7 @@ class Graph:
                     p = [pp.email for pp in i["PeopleAvailiable"] if pp.isOpen==True]
                     print(g,i["meeting_time"]," ".join(p))
 
-    def run(self,generation_cap=500,mentors_per_group=1):
+    def run(self,generation_cap=500,mentors_per_group=1,web=False):
         # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
         #  in the graph and remove them.
         # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
@@ -406,9 +431,11 @@ class Graph:
 
 
         print("Best Group found in generation:%s" % final_group["generation"])
+        final_groups,unmatched = self.output(groups,scores)
+        if not web:
+            self.write_results(final_groups,unmatched)
 
-        self.write_results(groups,scores)
-        return scores[0]
+        return scores,final_groups,unmatched
     def print_group(self,group):
         keys = group.keys()
         badkeys = ["total_people","mentees","mentor"]
@@ -469,9 +496,8 @@ class Graph:
         return groupnumber
 
 
-    def write_results(self,groups,scores):
-        f = open("groups.csv","w")
-        f.write("Day,Time,Mentor,Mentees,AdditionalFeatures\n")
+    def output(self,groups,scores):
+        out_tupes = []
         for g in groups:
             mentee_list = " ".join([z.email for z in g["mentees"]])
             mentor_list = " ".join([z.email for z in g["mentor"]])
@@ -483,11 +509,17 @@ class Graph:
                 if k not in badkeys:
                     if float(g[k]) > .85:
                         features = features +" "+ k
+            out_tupes.append((g["key"],g["time"],mentor_list,mentee_list,features))
+        unmatched = self.find_unmatched_mentees()
+        return out_tupes,unmatched
 
-            f.write("%s,%s,%s,%s,%s\n" % (g["key"],g["time"],mentor_list,mentee_list,features))
+    def write_results(self,final_groups,unmatched):
+        f = open("groups.csv","w")
+        f.write("Day,Time,Mentor,Mentees,AdditionalFeatures\n")
+        for o in final_groups:
+            f.write("%s,%s,%s,%s,%s\n" % o)
         f.close()
         f = open("unmatched.csv","w")
-        unmatched = self.find_unmatched_mentees()
         f.write("Email\n")
         for u in unmatched:
             f.write(u + "\n")

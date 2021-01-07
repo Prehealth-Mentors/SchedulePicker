@@ -162,7 +162,7 @@ if __name__== "__main__":
 
     dg = DataGen()
     #dg.format_real_data("realdata/mentors.csv","realdata/mentees.csv")
-    dg.create_fake_data(num_mentees=500,num_mentors=50)
+    dg.create_fake_data()
 
 
 

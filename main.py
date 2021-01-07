@@ -12,13 +12,15 @@ def main(args):
     g = Graph(args.input_file[0],meeting_duration=args.meeting_duration,weekend_meetings=args.weekend_meetings,earliest_time=args.earliest_time,latest_time=args.latest_time,sample_size=args.sample_size,group_size=args.group_size,time_delta=args.time_delta)
     # Set the score arguements
     g.set_score_args(args.unmatched_weight,args.groupsize_weight,args.num_groups_weight,args.feature_weight)
-    best_score = g.run(generation_cap=args.max_generations,mentors_per_group=args.mentors_per_group)
-    print("Best Score: %f" % best_score)
-    if args.send_emails or best_score >= args.emails_theshold:
-        print("Sending emails",best_score,args.emails_theshold)
-        #e = Emailer()
-        #e.send_email()
-        #e.close()
+    best_score,final_groups,unmatched = g.run(generation_cap=args.max_generations,mentors_per_group=args.mentors_per_group)
+
+    if len(best_score) > 0:
+        print("Best Score: %f" % best_score[0])
+        if args.send_emails or best_score[0] >= args.emails_theshold:
+            print("Sending emails",best_score[0],args.emails_theshold)
+            #e = Emailer()
+            #e.send_email()
+            #e.close()
 
 
 if __name__ =="__main__":

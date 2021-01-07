@@ -1,5 +1,5 @@
 Email,isMentor,Times
-blah@baylor.edu,1,M:2:00-4:00
-blah2@baylor.edu,2,M:2:00-4:00
-blah3@baylor.edu,3,M:2:00-4:00
-bla4@baylor.edu,4,M:2:00-4:00
+blah@baylor.edu,1,M:2:00PM-4:00PM
+blah2@baylor.edu,0,M:2:00PM-4:00PM
+blah3@baylor.edu,0,M:2:00PM-4:00PM
+bla4@baylor.edu,0,M:2:00PM-4:00PM
