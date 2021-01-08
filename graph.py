@@ -77,7 +77,6 @@ class Graph:
 
         print(self.graph.keys())
 
-
     def key_hash(self,key):
         # Since users mess up, (all the time) lets define a function that allows us to use differnt day names
         #  and still hash to the same key
@@ -128,7 +127,6 @@ class Graph:
             if is_first:
                 is_first = False
                 counter = 0
-                print(row)
                 for r in row:
                     feature_dict[r.lower().strip()] = counter
                     counter  = counter + 1
@@ -138,6 +136,10 @@ class Graph:
                 assert(feature_dict["times"] == counter - 1)
 
             else:
+                # If this is an empty row, we out boiz
+                if len(row)< len(feature_dict.keys()):
+                    break
+
                 # The first element of the table should be the email address of the person
                 email = row[feature_dict["email"]]
 
@@ -146,9 +148,6 @@ class Graph:
                 isMentor = row[feature_dict["ismentor"]] == '1'
 
                 # Finally check to see if there are any additional features that we need to be aware of
-
-
-
                 node = Node(email,isMentor,True)
 
                 key_list =  [key for key in feature_dict.keys() if key != "email" and key != "times" and key != "ismentor"]
