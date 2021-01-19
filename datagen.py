@@ -92,7 +92,7 @@ class DataGen:
     def create_times(self,num_days):
         added = []
         for n in range(0,num_days):
-            day = self.switcher(random.randint(1,7))
+            day = self.switcher(random.randint(1,5))
 
             start_hour = random.randint(0,23)
             start_minute = random.randint(0,58)
@@ -162,7 +162,7 @@ if __name__== "__main__":
 
     dg = DataGen()
     #dg.format_real_data("realdata/mentors.csv","realdata/mentees.csv")
-    dg.create_fake_data(num_mentees=50,num_mentors=5)
+    dg.create_fake_data(num_mentees=500,num_mentors=25)
 
 
 

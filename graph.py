@@ -324,6 +324,7 @@ class Graph:
                     print(g,i["meeting_time"]," ".join(p))
 
     def run(self,generation_cap=500,mentors_per_group=1,web=False):
+        print(self.uw,self.gsw,self.ngw,self.fw )
         # Lets use a greedy approach at the beginning in order to find groups. We will look for the largest clusters
         #  in the graph and remove them.
         # First, we need to define a condition to kill the learning. We want this condition to happen when we hit an
@@ -544,6 +545,8 @@ class Graph:
             self.ngw = ngw
             self.fw = fw
 
+
+
     def calculate_score(self):
         # The score is used to see how close to a solution we have gotten to
         # The program is trying to optimize the score that it recieves per move
@@ -639,7 +642,10 @@ class Graph:
         return score
 
 
-
+def graph(contents, meeting_duration,sample_size,group_size, earliest_time,latest_time,unmatched,groupsize,num_group,features,web,mentors_per_group):
+    g = Graph("placeholder.txt", contents=contents,meeting_duration=meeting_duration,sample_size=sample_size,group_size=group_size, earliest_time=earliest_time,latest_time=latest_time)
+    g.set_score_args(unmatched,groupsize,num_group,features)
+    return g.run(web=web,mentors_per_group=mentors_per_group)
 
 
 

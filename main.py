@@ -9,7 +9,7 @@ from emailer import Emailer
 
 # Functions
 def main(args):
-    g = Graph(args.input_file[0],meeting_duration=args.meeting_duration,earliest_time=params[""],latest_time=args.latest_time,sample_size=args.sample_size,group_size=args.group_size,time_delta=args.time_delta)
+    g = Graph(args.input_file[0],meeting_duration=args.meeting_duration,earliest_time=args.earliest_time,latest_time=args.latest_time,sample_size=args.sample_size,group_size=args.group_size,time_delta=args.time_delta)
     # Set the score arguements
     g.set_score_args(args.unmatched_weight,args.groupsize_weight,args.num_groups_weight,args.feature_weight)
     best_score,final_groups,unmatched = g.run(generation_cap=args.max_generations,mentors_per_group=args.mentors_per_group)
