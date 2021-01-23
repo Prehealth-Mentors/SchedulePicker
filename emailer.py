@@ -8,7 +8,7 @@
 import smtplib
 from email.message import EmailMessage
 import csv
-
+import argparse
 class Emailer:
     def __init__(self):
 
@@ -68,9 +68,9 @@ class Emailer:
     def close(self):
         self.server.quit()
 
-    def read_file(self):
+    def read_file(self,filename):
         # This program defaults to reading the groups.csv file.
-        with open('groups.csv', newline='') as csvfile:
+        with open(filename, newline='') as csvfile:
             firstRow = True
             data_dicts = []
             header = dict()
@@ -92,8 +92,9 @@ class Emailer:
 
 
 
-    def send_email(self):
-        data_dicts = self.read_file()
+    def send_email(self,filename):
+        data_dicts = self.read_file(filename)
+
         for d in data_dicts:
             to = d["Mentor"] + " " + d["Mentees"]
             to = to.split(" ")
@@ -103,12 +104,21 @@ class Emailer:
             mentees = [e.split("@")[0] for e in mentees]
 
             msg = self.template_string(to,mentor_name,mentees,d["Day"],d["Time"])
-            self.server.send_message(msg)
+            #self.server.send_message(msg)
 
 
 
 if __name__ =="__main__":
+    parser = argparse.ArgumentParser(description='Process command line options')
+    requiredNamed = parser.add_argument_group('required named arguments')
+    requiredNamed.add_argument('--input_file', required=True, metavar='-i', nargs='+', help='the path to the input file')
+
+    args = parser.parse_args()
+
+
+
     e = Emailer()
-    e.send_email()
+    e.send_email(args.input_file[0])
     e.close()
+
 
