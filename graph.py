@@ -642,7 +642,7 @@ class Graph:
         return score
 
 
-def graph(contents, meeting_duration,sample_size,group_size, earliest_time,latest_time,unmatched,groupsize,num_group,features,web,mentors_per_group):
+def run_graph(contents, meeting_duration,sample_size,group_size, earliest_time,latest_time,unmatched,groupsize,num_group,features,web,mentors_per_group):
     g = Graph("placeholder.txt", contents=contents,meeting_duration=meeting_duration,sample_size=sample_size,group_size=group_size, earliest_time=earliest_time,latest_time=latest_time)
     g.set_score_args(unmatched,groupsize,num_group,features)
     return g.run(web=web,mentors_per_group=mentors_per_group)
