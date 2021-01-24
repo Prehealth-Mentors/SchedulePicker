@@ -84,7 +84,8 @@ class Emailer:
                 else:
                     group_dict = dict()
                     for i in range(0,len(row)):
-                        group_dict[header[i]] = row[i]
+                        if i in header.keys():
+                            group_dict[header[i]] = row[i]
                     data_dicts.append(group_dict)
         return data_dicts
 
