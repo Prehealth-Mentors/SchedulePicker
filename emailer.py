@@ -100,11 +100,15 @@ class Emailer:
             to = d["Mentor"] + " " + d["Mentees"]
             to = to.split(" ")
 
-            mentor_name = d["Mentor"].split("@")[0]
+            mentor_name = d["Mentor"].split(" ")
+            mentor_name = ",".join([e.split("@")[0] for e in mentor_name])
+
+
             mentees = d["Mentees"].split(" ")
             mentees = [e.split("@")[0] for e in mentees]
 
             msg = self.template_string(to,mentor_name,mentees,d["Day"],d["Time"])
+            print(msg)
             #self.server.send_message(msg)
 
 
