@@ -11,6 +11,7 @@ import random
 import copy
 import statistics
 from io import StringIO
+import re
 
 class Node:
     def __init__(self,email,isMentor,isOpen):
@@ -118,6 +119,12 @@ class Graph:
             csvfile = open(filename, newline='')
             spamreader = csvfile.read()
             csvfile.close()
+
+        # Lets clean up the input file using some regex so that we can eliminate some common errors
+        spamreader = re.sub(":\([0-9]\):",":0\1:",spamreader)
+        spamreader = re.sub("-\([0-9]\):","-0\1::",spamreader)
+        spamreader = re.sub("Times.*","Times",spamreader)
+        spamreader = spamreader.replace('\r', '')
         spamreader = spamreader.split("\n")
 
 
@@ -168,8 +175,10 @@ class Graph:
 
                         times = ":".join(sp[1:]).split("-")
                         beginning = datetime.strptime(times[0], self.time_format)
-                        ending = datetime.strptime(times[1], self.time_format)
-
+                        try:
+                          ending = datetime.strptime(times[1], self.time_format)
+                        except:
+                          print(row)
                         # Bad news is that this is a range, so we have to check to see which durations we can fit in
                         for g in range(0,len(self.graph[self.key_hash(day)])):
                             ti = self.graph[self.key_hash(day)][g]

@@ -9,6 +9,8 @@ import smtplib
 from email.message import EmailMessage
 import csv
 import argparse
+
+
 class Emailer:
     def __init__(self):
 
@@ -53,7 +55,7 @@ class Emailer:
             Day: %s
             Time: %s
 
-            If you have any questions, please reach out to the PHP TAs.
+            If you have any questions, please reach out to the PHP TAs. Please ignore this message if it is a duplicate.
 
             Thanks,
 
@@ -108,8 +110,8 @@ class Emailer:
             mentees = [e.split("@")[0] for e in mentees]
 
             msg = self.template_string(to,mentor_name,mentees,d["Day"],d["Time"])
-            print(msg)
-            #self.server.send_message(msg)
+
+            self.server.send_message(msg)
 
 
 
