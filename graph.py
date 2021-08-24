@@ -174,11 +174,11 @@ class Graph:
                         # Now get the times
 
                         times = ":".join(sp[1:]).split("-")
-                        beginning = datetime.strptime(times[0], self.time_format)
                         try:
+                          beginning = datetime.strptime(times[0], self.time_format)
                           ending = datetime.strptime(times[1], self.time_format)
                         except:
-                          print(row)
+                          print("Error: Improper time format",row)
                         # Bad news is that this is a range, so we have to check to see which durations we can fit in
                         for g in range(0,len(self.graph[self.key_hash(day)])):
                             ti = self.graph[self.key_hash(day)][g]
