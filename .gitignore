@@ -136,3 +136,4 @@ groups.csv
 unmatched.csv
 config.txt
 __init__.py
+*.csv
