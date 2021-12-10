@@ -146,7 +146,6 @@ class Graph:
                 # If this is an empty row, we out boiz
                 if len(row)< len(feature_dict.keys()):
                     break
-
                 # The first element of the table should be the email address of the person
                 email = row[feature_dict["email"]]
 
