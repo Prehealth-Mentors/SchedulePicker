@@ -137,3 +137,4 @@ unmatched.csv
 config.txt
 __init__.py
 *.csv
+.DS_Store
