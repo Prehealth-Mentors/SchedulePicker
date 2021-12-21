@@ -5,19 +5,26 @@
 # Imports
 import argparse
 from graph import Graph
+from excelGraph import ExcelGraph
 from emailer import Emailer
 
 # Functions
 def main(args):
-    g = Graph(args.input_file[0],meeting_duration=args.meeting_duration,earliest_time=args.earliest_time,latest_time=args.latest_time,sample_size=args.sample_size,group_size=args.group_size,time_delta=args.time_delta)
+    isExcel = args.input_file[0].split(".")[1]
+
+    g = None
+    if isExcel == "xlsx":
+        g = ExcelGraph(args.input_file[0],meeting_duration=args.meeting_duration,earliest_time=args.earliest_time,latest_time=args.latest_time,sample_size=args.sample_size,group_size=args.group_size,time_delta=args.time_delta)
+    else:
+        g = Graph(args.input_file[0],meeting_duration=args.meeting_duration,earliest_time=args.earliest_time,latest_time=args.latest_time,sample_size=args.sample_size,group_size=args.group_size,time_delta=args.time_delta)
     # Set the score arguements
     g.set_score_args(args.unmatched_weight,args.groupsize_weight,args.num_groups_weight,args.feature_weight)
     best_score,final_groups,unmatched = g.run(generation_cap=args.max_generations,mentors_per_group=args.mentors_per_group)
 
-    if len(best_score) > 0:
-        print("Best Score: %f" % best_score[0])
-        if args.send_emails or best_score[0] >= args.emails_theshold:
-            print("Sending emails",best_score[0],args.emails_theshold)
+    #if len(best_score) > 0:
+    #    print("Best Score: %f" % best_score[0])
+    #    if args.send_emails or best_score[0] >= args.emails_theshold:
+    #        print("Sending emails",best_score[0],args.emails_theshold)
             #e = Emailer()
             #e.send_email()
             #e.close()

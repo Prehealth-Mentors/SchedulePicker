@@ -21,7 +21,8 @@ class Node:
         self.feature_dict = dict()
     def toString(self):
         print(self.email,self.isMentor,self.isOpen)
-
+    def __str__(self):
+        return "%s,%s,%s" % (self.email,self.isMentor,self.isOpen)
 
 class Graph:
     def __init__(self,filename,meeting_duration=75,weekend_meetings=False,earliest_time="8:00AM",latest_time="5:00PM",sample_size=25,group_size=None,time_delta=15,contents=None):
@@ -76,8 +77,6 @@ class Graph:
             del self.graph["S"]
             del self.graph["N"]
 
-        print(self.graph.keys())
-
     def key_hash(self,key):
         # Since users mess up, (all the time) lets define a function that allows us to use differnt day names
         #  and still hash to the same key
@@ -105,11 +104,78 @@ class Graph:
             "n":"N"
         }
         key = key.strip()
+
         return hash_thing[key.lower()]
 
+
+    # This function cleans up a strings so that they work with the program
+    def regexClean(self,value):
+        value = re.sub(":\([0-9]\):",":0\1:",value)
+        value = re.sub("-\([0-9]\):","-0\1::",value)
+        value = re.sub("Times.*","Times",value)
+        value = value.replace('\r', '')
+        return value
+
+    def firstrow(self,row):
+        feature_dict = dict()
+        is_first = False
+        counter = 0
+
+        for r in row:
+            if r is not None:
+                feature_dict[r.lower().strip()] = counter
+                counter  = counter + 1
+
+        # Check to make sure that times is the last field in the header row. Since
+        #  there can be more than one time, this must be the case
+        assert(feature_dict["times"] == counter - 1)
+        return feature_dict, is_first
+
+
+    def dataRow(self,feature_dict,row):
+        # The first element of the table should be the email address of the person
+
+        email = row[feature_dict["email"]]
+
+        # The second row should be if they are a mentor or not
+        self.num_mentors = self.num_mentors + int(row[feature_dict["ismentor"]])
+        isMentor = int(row[feature_dict["ismentor"]]) == 1
+
+        # Finally check to see if there are any additional features that we need to be aware of
+        node = Node(email,isMentor,True)
+
+        key_list =  [key for key in feature_dict.keys() if key != "email" and key != "times" and key != "ismentor"]
+
+        for key in key_list:
+            node.feature_dict[key] = int(row[feature_dict[key]])  == 1
+        self.peopleHash[email] = node
+
+        # The final rows should be the times that the person is availiable
+        for z in row[feature_dict["times"]:]:
+            # First get the day
+            if z is not None:
+                sp = z.split(":")
+
+                if len(sp) > 1:
+                    day = sp[0]
+
+                    # Now get the times
+                    times = ":".join(sp[1:]).split("-")
+                    try:
+                        beginning = datetime.strptime(times[0], self.time_format)
+                        ending = datetime.strptime(times[1], self.time_format)
+                    except:
+                        print("Error: Improper time format",row)
+                    # Bad news is that this is a range, so we have to check to see which durations we can fit in
+                    for g in range(0,len(self.graph[self.key_hash(day)])):
+                        ti = self.graph[self.key_hash(day)][g]
+                        if ti["beginning"] >= beginning and ti["ending"] <= ending and self.weekend_check(day):
+                            ti["PeopleAvailiable"].append(node)
+                            assert(node == ti["PeopleAvailiable"][len(ti["PeopleAvailiable"])-1])
+
     def readfile(self,filename,contents=None):
-        peopleHash = {}
-        num_mentors = 0
+        self.peopleHash = {}
+        self.num_mentors = 0
         is_first = True
 
         spamreader = contents
@@ -121,83 +187,32 @@ class Graph:
             csvfile.close()
 
         # Lets clean up the input file using some regex so that we can eliminate some common errors
-        spamreader = re.sub(":\([0-9]\):",":0\1:",spamreader)
-        spamreader = re.sub("-\([0-9]\):","-0\1::",spamreader)
-        spamreader = re.sub("Times.*","Times",spamreader)
-        spamreader = spamreader.replace('\r', '')
-        spamreader = spamreader.split("\n")
+        spamreader = self.regexClean(spamreader)
 
+        spamreader = spamreader.split()
 
-        feature_dict = dict()
+        feature_dict = None
         for row in spamreader:
             row = row.split(",")
             if is_first:
-                is_first = False
-                counter = 0
-                for r in row:
-                    feature_dict[r.lower().strip()] = counter
-                    counter  = counter + 1
-
-                # Check to make sure that times is the last field in the header row. Since
-                #  there can be more than one time, this must be the case
-                assert(feature_dict["times"] == counter - 1)
-
+                feature_dict, is_first = self.firstrow(row)
             else:
                 # If this is an empty row, we out boiz
                 if len(row)< len(feature_dict.keys()):
                     break
-                # The first element of the table should be the email address of the person
-                email = row[feature_dict["email"]]
-
-                # The second row should be if they are a mentor or not
-                num_mentors = num_mentors + int(row[feature_dict["ismentor"]])
-                isMentor = row[feature_dict["ismentor"]] == '1'
-
-                # Finally check to see if there are any additional features that we need to be aware of
-                node = Node(email,isMentor,True)
-
-                key_list =  [key for key in feature_dict.keys() if key != "email" and key != "times" and key != "ismentor"]
-
-                for key in key_list:
-                    node.feature_dict[key] = row[feature_dict[key]]  == '1'
-                peopleHash[email] = node
-
-                # The final rows should be the times that the person is availiable
-                for z in row[2:]:
-                    # First get the day
-                    sp = z.split(":")
-
-                    if len(sp) > 1:
-                        day = sp[0]
-
-                        # Now get the times
-
-                        times = ":".join(sp[1:]).split("-")
-                        try:
-                          beginning = datetime.strptime(times[0], self.time_format)
-                          ending = datetime.strptime(times[1], self.time_format)
-                        except:
-                          print("Error: Improper time format",row)
-                        # Bad news is that this is a range, so we have to check to see which durations we can fit in
-                        for g in range(0,len(self.graph[self.key_hash(day)])):
-                            ti = self.graph[self.key_hash(day)][g]
-                            if ti["beginning"] >= beginning and ti["ending"] <= ending and self.weekend_check(day):
-                                ti["PeopleAvailiable"].append(node)
-                                assert(node == ti["PeopleAvailiable"][len(ti["PeopleAvailiable"])-1])
+                else:
+                    self.dataRow(feature_dict,row)
 
         # Calculate the target group size based on the mentor mentee ratio
-        self.group_size = int((len(peopleHash.keys()) - num_mentors)/num_mentors) + 1
+        self.group_size = int((len(self.peopleHash.keys()) - self.num_mentors)/self.num_mentors) + 1
 
-        self.num_mentors =num_mentors
-
-        return peopleHash
+        return self.peopleHash
 
     def weekend_check(self,day):
         good = True
         if self.weekend_meetings is False and (self.key_hash(day) == "s" or self.key_hash(day) == "n"):
             good = False
         return good
-
 
 
     def find_largest_cluster(self):
@@ -229,17 +244,13 @@ class Graph:
 
               if len(nodes)- len(mentors) >= self.group_size  and {"key":key,"time":str_time} not in pasttries and len(mentors) > 0:
                   clusters.append({"str_time":e["meeting_time"],"key":g})
+
         return self.group_size,clusters
-
-
-
-
 
     def update(self,peoplelist=[],value_change=False):
         for people in peoplelist:
             if people != "None":
                 people.isOpen = value_change
-
 
 
     def make_group(self,ti,key):
@@ -342,10 +353,6 @@ class Graph:
         # Group size has to change if we have multiple mentors per group
         self.group_size = self.group_size * self.mentors_per_group
 
-
-
-        # We have to de
-
         # Create an array to hold the groups that we created
         self.groups = []
 
@@ -361,6 +368,7 @@ class Graph:
 
         self.tree = dict()
         groupnumber = 0
+
         while not killSwitch and generation < generation_cap:
             # We are trying a generation based approach
             # To do this, we first need to find parents from the previous generation
@@ -379,9 +387,9 @@ class Graph:
 
                 groupnumber = self.process_cluster(clusters,groupnumber,generation,parent=-1)
             else:
-
                 # Otherwise, we have to loop through all of the groups from the previous generation
                 # and create the next generation based on that.
+
                 for id in ids:
                     grp = self.tree[id]
 
@@ -395,18 +403,11 @@ class Graph:
                     # Now lets find the clusters that we are looking for
                     max_people, clusters = self.find_target_size_clusters()
 
-
-
-
                     # if we can't find anything with the target size, lets just try to make a few more groups
                     if len(clusters) == 0:
                         max_people,clusters = self.find_largest_cluster()
 
-
-
                     clusters = random.sample(clusters,min(len(clusters),20))
-
-
 
                     # If we still can't find anything, this id is donzo
                     if len(clusters) != 0:
@@ -436,7 +437,6 @@ class Graph:
         # Get the group so we can update everything
         final_group = self.tree[id]
         self.update(peoplelist=final_group["total_people"])
-
 
         print("Best Group found in generation:%s" % final_group["generation"])
         final_groups,unmatched = self.output(groups,scores)
